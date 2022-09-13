@@ -36,10 +36,12 @@ function(set_compile_options targetName)
     # ----- Setup variables -----
     # MSVC compiler flags
     set(MSVC_DEBUG
+        /MP  # Multiprocess compiling
         /Od  # Disable optimization
         /ZI  # Create full PDB file
     )
     set(MSVC_RELEASE
+        /MP  # Multiprocess compiling
         /O2  # Maximize speed
         /Zi  # Create small PDB while keeping optimization
     )
