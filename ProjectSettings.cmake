@@ -71,13 +71,13 @@ function(set_compile_options targetName)
     set(OPTIONS_DEBUG)
     set(OPTIONS_RELEASE)
 
-    if(MSVC)                                         # MSVC
+    if(MSVC)                                          # MSVC
         set(OPTIONS_DEBUG   ${MSVC_DEBUG})
         set(OPTIONS_RELEASE ${MSVC_RELEASE})
-    elseif(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")  # Clang
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")       # Clang
         set(OPTIONS_DEBUG   ${GCC_DEBUG})
         set(OPTIONS_RELEASE ${GCC_RELEASE})
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")     # GCC
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL ".*Clang")  # GCC
         set(OPTIONS_DEBUG   ${CLANG_DEBUG})
         set(OPTIONS_RELEASE ${CLANG_RELEASE})
     else()                                           # Else
