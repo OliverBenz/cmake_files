@@ -11,7 +11,7 @@ function(copy_headers_to_output targetName headerFiles subDirectory)
         get_filename_component(fileName ${filePath} NAME)
 
         string(TOLOWER ${targetName} lowerTargetName)
-        set(outputPath ${CMAKE_BINARY_DIR}/out/include/${lowerTargetName}/${subDirectory}/${fileName})
+        set(outputPath ${CMAKE_BINARY_DIR}/out/include/${subDirectory}/${fileName})
 
         add_custom_command(
             TARGET ${targetName}
