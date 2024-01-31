@@ -16,7 +16,7 @@ function(copy_headers_to_output targetName headerFiles subDirectory)
         add_custom_command(
             TARGET ${targetName}
             POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${filePath} ${outputPath}
+            COMMAND ${CMAKE_COMMAND} -E copy ${filePath} ${outputPath}
         )
     endforeach()
 endfunction()
