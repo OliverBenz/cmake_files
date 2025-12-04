@@ -48,7 +48,7 @@ function(set_compile_options targetName)
 
     # GCC compiler flags
     set(GCC_DEBUG
-        -O0  # No optimization
+        -Og  # No optimization
         -g   # Create debugging information
     )
     set(GCC_RELEASE
@@ -58,7 +58,7 @@ function(set_compile_options targetName)
 
     # Clang compiler flags
     set(CLANG_DEBUG
-        -O0  # No optimization
+        -Og  # No optimization
         -g   # Create debugging information
     )
     set(CLANG_RELEASE
