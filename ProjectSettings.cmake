@@ -29,6 +29,50 @@ set(ideFolderTests    "Tests"    CACHE STRING "IDE folder for testing projects."
 
 
 # ----- Helper functions -----
+function(project_settings_configure_install_layout ARCH_VAR CONFIG_VAR BASE_VAR)
+    set(options)
+    set(oneValueArgs PROJECT_NAME INSTALL_PREFIX)
+    set(multiValueArgs)
+    cmake_parse_arguments(INSTALLLAYOUT "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    if(NOT INSTALLLAYOUT_PROJECT_NAME)
+        message(FATAL_ERROR "project_settings_configure_install_layout requires PROJECT_NAME to be set.")
+    endif()
+
+    set(_ps_prefix "${INSTALLLAYOUT_INSTALL_PREFIX}")
+    if(NOT _ps_prefix)
+        set(_ps_prefix "${CMAKE_INSTALL_PREFIX}")
+    endif()
+
+    # Normalize architecture naming
+    set(_ps_arch "${CMAKE_SYSTEM_PROCESSOR}")
+    if(NOT _ps_arch)
+        set(_ps_arch "${CMAKE_HOST_SYSTEM_PROCESSOR}")
+    endif()
+    string(TOLOWER "${_ps_arch}" _ps_arch_lower)
+    if(_ps_arch_lower STREQUAL "x86_64" OR _ps_arch_lower STREQUAL "amd64")
+        set(_ps_arch_norm "x64")
+    elseif(_ps_arch_lower STREQUAL "i386" OR _ps_arch_lower STREQUAL "i686")
+        set(_ps_arch_norm "x86")
+    elseif(_ps_arch_lower STREQUAL "aarch64" OR _ps_arch_lower STREQUAL "arm64")
+        set(_ps_arch_norm "arm64")
+    elseif(_ps_arch_lower MATCHES "^armv7")
+        set(_ps_arch_norm "armv7")
+    else()
+        set(_ps_arch_norm "${_ps_arch}")
+    endif()
+
+    # Preserve the install-time config variable so multi-config generators resolve it correctly.
+    set(${ARCH_VAR} "${_ps_arch_norm}" PARENT_SCOPE)
+    set(${CONFIG_VAR} "\${CMAKE_INSTALL_CONFIG_NAME}" PARENT_SCOPE)
+    set(${BASE_VAR} "${_ps_prefix}/${INSTALLLAYOUT_PROJECT_NAME}/\${CMAKE_INSTALL_CONFIG_NAME}/${_ps_arch_norm}" PARENT_SCOPE)
+
+    unset(_ps_prefix)
+    unset(_ps_arch)
+    unset(_ps_arch_lower)
+    unset(_ps_arch_norm)
+endfunction()
+
 function(set_compile_options targetName)
     set(optionsDebug)
     set(optionsRelease)
