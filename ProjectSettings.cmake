@@ -22,34 +22,23 @@ set(CMAKE_DEBUG_POSTFIX d CACHE STRING "Add 'd' to lib name in Debug build")
 # ----- Setup ide folders -----
 set_property(GLOBAL PROPERTY USE_FOLDERS TRUE)  # In solution files; we want the projects to be categorized
 
-set(ideFolderSource   "Source"   CACHE STRING "IDE folder for source projects.")
-set(ideFolderExamples "Examples" CACHE STRING "IDE folder for example projects.")
-set(ideFolderExternal "External" CACHE STRING "IDE folder for external projects.")
-set(ideFolderTests    "Tests"    CACHE STRING "IDE folder for testing projects.")
+set(IDE_FOLDER_SOURCE   "Source"   CACHE STRING "IDE folder for source projects.")
+set(IDE_FOLDER_EXAMPLES "Examples" CACHE STRING "IDE folder for example projects.")
+set(IDE_FOLDER_EXTERNAL "External" CACHE STRING "IDE folder for external projects.")
+set(IDE_FOLDER_TESTS    "Tests"    CACHE STRING "IDE folder for testing projects.")
 
 
 # ----- Helper functions -----
-function(project_settings_configure_install_layout ARCH_VAR CONFIG_VAR BASE_VAR)
-    set(options)
-    set(oneValueArgs PROJECT_NAME INSTALL_PREFIX)
-    set(multiValueArgs)
-    cmake_parse_arguments(INSTALLLAYOUT "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-
-    if(NOT INSTALLLAYOUT_PROJECT_NAME)
-        message(FATAL_ERROR "project_settings_configure_install_layout requires PROJECT_NAME to be set.")
-    endif()
-
-    set(_ps_prefix "${INSTALLLAYOUT_INSTALL_PREFIX}")
-    if(NOT _ps_prefix)
-        set(_ps_prefix "${CMAKE_INSTALL_PREFIX}")
-    endif()
-
-    # Normalize architecture naming
+# Get the system architecture (x64, x86, etc) as a string.
+# OUT_VAR [OUT] System architecture string.
+function(project_settings_normalize_architecture OUT_VAR)
     set(_ps_arch "${CMAKE_SYSTEM_PROCESSOR}")
     if(NOT _ps_arch)
         set(_ps_arch "${CMAKE_HOST_SYSTEM_PROCESSOR}")
     endif()
+
     string(TOLOWER "${_ps_arch}" _ps_arch_lower)
+    
     if(_ps_arch_lower STREQUAL "x86_64" OR _ps_arch_lower STREQUAL "amd64")
         set(_ps_arch_norm "x64")
     elseif(_ps_arch_lower STREQUAL "i386" OR _ps_arch_lower STREQUAL "i686")
@@ -62,15 +51,57 @@ function(project_settings_configure_install_layout ARCH_VAR CONFIG_VAR BASE_VAR)
         set(_ps_arch_norm "${_ps_arch}")
     endif()
 
-    # Preserve the install-time config variable so multi-config generators resolve it correctly.
-    set(${ARCH_VAR} "${_ps_arch_norm}" PARENT_SCOPE)
-    set(${CONFIG_VAR} "\${CMAKE_INSTALL_CONFIG_NAME}" PARENT_SCOPE)
-    set(${BASE_VAR} "${_ps_prefix}/${INSTALLLAYOUT_PROJECT_NAME}/\${CMAKE_INSTALL_CONFIG_NAME}/${_ps_arch_norm}" PARENT_SCOPE)
-
-    unset(_ps_prefix)
+    set(${OUT_VAR} "${_ps_arch_norm}" PARENT_SCOPE)
+    
     unset(_ps_arch)
     unset(_ps_arch_lower)
     unset(_ps_arch_norm)
+endfunction()
+
+# Get the required strings to construct the build directory output layout.
+# ARCH_VAR   [OUT] System architecture as string.
+# CONFIG_VAR [OUT] Build configuration as string.
+# BASE_VAR   [OUT] Base path for the output directory.
+function(project_settings_configure_build_layout ARCH_VAR CONFIG_VAR BASE_VAR)
+    project_settings_normalize_architecture(_ps_arch_norm)
+
+    set(${ARCH_VAR} "${_ps_arch_norm}" PARENT_SCOPE)
+    set(${CONFIG_VAR} "$<CONFIG>" PARENT_SCOPE)
+    set(${BASE_VAR} "${CMAKE_BINARY_DIR}/out" PARENT_SCOPE)
+
+    unset(_ps_arch_norm)
+endfunction()
+
+# Get the required strings to construct the install directory output layout.
+# ARCH_VAR   [OUT] System architecture as string.
+# CONFIG_VAR [OUT] Build configuration as string.
+# BASE_VAR   [OUT] Base path for the output directory.
+# 
+# PROJECT_NAME   [IN] Project name is added to the BASE_VAR
+# INSTALL_PREFIX [IN] Installation path
+function(project_settings_configure_install_layout ARCH_VAR CONFIG_VAR BASE_VAR)
+    set(options)
+    set(oneValueArgs PROJECT_NAME INSTALL_PREFIX)
+    cmake_parse_arguments(INSTALLLAYOUT "" "${oneValueArgs}" "" ${ARGN})
+
+    if(NOT INSTALLLAYOUT_PROJECT_NAME)
+        message(FATAL_ERROR "project_settings_configure_install_layout requires PROJECT_NAME to be set.")
+    endif()
+
+    # Determine effective prefix (pure computation, no cache mutation)
+    if(INSTALLLAYOUT_INSTALL_PREFIX)
+        set(_ps_prefix "${INSTALLLAYOUT_INSTALL_PREFIX}")
+    else()
+        set(_ps_prefix "${CMAKE_INSTALL_PREFIX}")
+    endif()
+
+    # Normalize architecture naming
+    project_settings_normalize_architecture(_ps_arch_norm)
+
+    # Export computed layout
+    set(${ARCH_VAR}  "${_ps_arch_norm}" PARENT_SCOPE)
+    set(${CONFIG_VAR} "\${CMAKE_INSTALL_CONFIG_NAME}" PARENT_SCOPE)
+    set(${BASE_VAR}  "${_ps_prefix}/${INSTALLLAYOUT_PROJECT_NAME}" PARENT_SCOPE)
 endfunction()
 
 function(set_compile_options targetName)
@@ -145,12 +176,20 @@ function(set_compile_definitions targetName)
     # target_compile_definitions(${targetName} PRIVATE $<$<CONFIG:Release>:NDEBUG>>)
 endfunction()
 
-
+# Set the output directory of a given target
+# targetName [IN] target name. 
 function(set_output_directory targetName)
+    # Get the sanitized variables 
+    project_settings_configure_build_layout(
+        _ps_arch
+        _ps_config
+        _ps_build_base
+    )
+
     set_target_properties(${targetName}
         PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/out/lib"
-        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/out/lib"
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/out/bin"
+        ARCHIVE_OUTPUT_DIRECTORY "${_ps_build_base}/lib/${_ps_arch}/${_ps_config}"
+        LIBRARY_OUTPUT_DIRECTORY "${_ps_build_base}/lib/${_ps_arch}/${_ps_config}"
+        RUNTIME_OUTPUT_DIRECTORY "${_ps_build_base}/bin/${_ps_arch}/${_ps_config}"
     )
 endfunction()

@@ -10,13 +10,13 @@ function(copy_headers_to_output targetName headerFiles subDirectory)
     foreach(filePath ${headerFiles})
         get_filename_component(fileName ${filePath} NAME)
 
-        string(TOLOWER ${targetName} lowerTargetName)
         set(outputPath ${CMAKE_BINARY_DIR}/out/include/${subDirectory}/${fileName})
 
         add_custom_command(
             TARGET ${targetName}
             POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy ${filePath} ${outputPath}
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/out/include/${subDirectory}
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different ${filePath} ${outputPath}
         )
     endforeach()
 endfunction()
