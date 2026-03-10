@@ -54,6 +54,12 @@
 #
 
 
+# TODO:
+#   o Verify the script carefully
+#   o Build example projects
+#   o Add scripts to enforce common policies
+#   o Add templates for common policies. E.g. policy_enable_template("WinDependencies")
+#     Where: WinDependencies .. Policy set tracking dependencies to windows specific libraries
 include_guard(GLOBAL)
 
 
