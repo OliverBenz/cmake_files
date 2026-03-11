@@ -1,7 +1,8 @@
 # Sets the most useful compiler warning tags for different compilers for each specific target.
 # Source: https://github.com/lefticus/cppbestpractices/blob/master/02-Use_the_Tools_Available.md
 
-function(set_project_warnings project_name)
+# Use this function only on the predefined interface libraries.
+function(set_target_options_warnings targetName)
     option(WARNINGS_AS_ERRORS "Treat compiler warnings as errors" TRUE)
 
     set(MSVC_WARNINGS
@@ -66,7 +67,7 @@ function(set_project_warnings project_name)
 
     if(MSVC)
         set(PROJECT_WARNINGS ${MSVC_WARNINGS})
-    elseif(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         set(PROJECT_WARNINGS ${CLANG_WARNINGS})
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         set(PROJECT_WARNINGS ${GCC_WARNINGS})
@@ -75,5 +76,5 @@ function(set_project_warnings project_name)
     endif()
 
     message(STATUS "Compiler flags for warnings ${PROJECT_WARNINGS}")
-    target_compile_options(${project_name} PRIVATE ${PROJECT_WARNINGS})
+	target_compile_options(${targetName} INTERFACE ${PROJECT_WARNINGS})
 endfunction()
