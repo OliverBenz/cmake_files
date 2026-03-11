@@ -190,9 +190,10 @@ function(set_target_options_macros targetName)
 endfunction()
 
 
-set(targetName "ProjectDef")
+set(targetName "ConfigDefault")
 
 add_library(${targetName} INTERFACE)
+add_library(Config::Default ALIAS ${targetName})
 
 target_compile_features(${targetName} INTERFACE cxx_std_20)  # Special features
 set_target_options_warnings(${targetName})                   # Warning  Flags
