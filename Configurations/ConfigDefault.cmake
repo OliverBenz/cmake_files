@@ -171,10 +171,10 @@ function(_set_target_options_linker_def targetName)
 endfunction()
 
 
-message("")
-message("----- Configuration Default -----")
-message("---------------------------------")
-message("- Use ALIAS:             Config::Default")
+message(STATUS "")
+message(STATUS "----- Configuration Default -----")
+message(STATUS "---------------------------------")
+message(STATUS "- Use ALIAS:             Config::Default")
 
 set(targetName "ConfigDefault")
 

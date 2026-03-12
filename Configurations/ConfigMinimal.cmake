@@ -148,10 +148,10 @@ function(_set_target_options_linker_min targetName)
 endfunction()
 
 
-message("")
-message("----- Configuration Minimal -----")
-message("---------------------------------")
-message("- Use ALIAS:             Config::Minimal")
+message(STATUS "")
+message(STATUS "----- Configuration Minimal -----")
+message(STATUS "---------------------------------")
+message(STATUS "- Use ALIAS:             Config::Minimal")
 
 set(targetName "ConfigMinimal")
 

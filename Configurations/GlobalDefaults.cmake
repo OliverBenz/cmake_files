@@ -77,7 +77,7 @@ function(set_target_options_warnings targetName)
 	endif()
 
 	# ----- Print which flags used -----
-	message("- Enable Warning Settings: ${targetWarnings}")
+	message(STATUS "- Enable Warning Settings: ${targetWarnings}")
 
 	# ----- Add flags to target -----
 	target_compile_options(${targetName} INTERFACE ${targetWarnings})
@@ -91,7 +91,7 @@ function(set_target_options_macros_default targetName)
 	)
 
 	# ----- Print which flags used -----
-	message("- Use Macro Definitions: ${ALL}")
+	message(STATUS "- Use Macro Definitions: ${ALL}")
 
 	# ----- Add flags to target -----
 	target_compile_definitions(${targetName} INTERFACE ${OPTIONS})
@@ -111,7 +111,7 @@ function(set_target_options_macros_win targetName)
 	)
 
 	# ----- Print which flags used -----
-	message("- Use Win Macro Definitions: ${OPTIONS}")
+	message(STATUS "- Use Win Macro Definitions: ${OPTIONS}")
 
 	# ----- Add flags to target -----
 	target_compile_definitions(${targetName} INTERFACE ${OPTIONS})

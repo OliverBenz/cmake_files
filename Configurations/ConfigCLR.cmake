@@ -126,10 +126,10 @@ endif()
 # TODO: Test whether target defines /MT[d] -> Remove and add /MD[d]
 
 
-message("")
-message("----- Configuration CLR -----")
-message("-----------------------------")
-message("- Use ALIAS:             Config::CLR")
+message(STATUS "")
+message(STATUS "----- Configuration CLR -----")
+message(STATUS "-----------------------------")
+message(STATUS "- Use ALIAS:             Config::CLR")
 
 set(targetName "ConfigCLR")
 

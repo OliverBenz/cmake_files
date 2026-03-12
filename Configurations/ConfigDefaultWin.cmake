@@ -22,19 +22,19 @@ function(_set_target_options_macros_win targetName)
 	)
 
 	# ----- Print which flags used -----
-	message("- Use Macro Definitions: ${OPTIONS}")
+	message(STATUS "- Use Macro Definitions: ${OPTIONS}")
 
 	# ----- Add flags to target -----
 	target_compile_definitions(${targetName} INTERFACE ${OPTIONS})
 endfunction()
 
 
-message("")
-message("----- Configuration Default Windows -----")
-message("-----------------------------------------")
-message("- Use ALIAS:             Config::DefaultWin")
-message("- Use Compiler Flags:    Same as Default")
-message("- Use Linker Flags:      Same as Default")
+message(STATUS "")
+message(STATUS "----- Configuration Default Windows -----")
+message(STATUS "-----------------------------------------")
+message(STATUS "- Use ALIAS:             Config::DefaultWin")
+message(STATUS "- Use Compiler Flags:    Same as Default")
+message(STATUS "- Use Linker Flags:      Same as Default")
 
 set(targetName "ConfigDefaultWin")
 
