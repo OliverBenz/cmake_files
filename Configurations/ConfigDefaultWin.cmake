@@ -41,5 +41,5 @@ add_library(${targetName} INTERFACE)
 add_library(Config::DefaultWin ALIAS ${targetName})
 
 target_link_libraries(${targetName} INTERFACE Config::Default) # Same base configuration as Config::Default
-set_target_options_macros(${targetName})                       # Macro definitions
+set_target_options_macros_win(${targetName})                   # Macro definitions
 

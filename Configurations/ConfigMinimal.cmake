@@ -146,20 +146,6 @@ function(set_target_options_linker targetName)
 endfunction()
 
 
-function(set_target_options_macros targetName)
-	set(ALL
-		"$<$<CONFIG:Debug>:_DEBUG>"
-		"$<$<CONFIG:Release>:NDEBUG>"
-	)
-
-	# ----- Print which flags used -----
-	message("- Use Macro Definitions: ${ALL}")
-
-	# ----- Add flags to target -----
-	target_compile_definitions(${targetName} INTERFACE ${OPTIONS})
-endfunction()
-
-
 message("----- Configuration Minimal -----")
 message("---------------------------------")
 message("- Use ALIAS:             Config::Minimal")
@@ -172,4 +158,4 @@ add_library(Config::Minimal ALIAS ${targetName})
 target_compile_features(${targetName} INTERFACE cxx_std_20)  # Special features
 set_target_options_compiler(${targetName})                   # Compiler Flags
 set_target_options_linker(${targetName})                     # Linker   Flags
-set_target_options_macros(${targetName})                     # Macro definitions
+set_target_options_macros_default(${targetName})             # Macro definitions

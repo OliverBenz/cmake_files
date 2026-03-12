@@ -82,3 +82,37 @@ function(set_target_options_warnings targetName)
     # ----- Add flags to target -----
 	target_compile_options(${targetName} INTERFACE ${targetWarnings})
 endfunction()
+
+# Add default macros to the target.
+function(set_target_options_macros_default targetName)
+	set(ALL
+		"$<$<CONFIG:Debug>:_DEBUG>"
+		"$<$<CONFIG:Release>:NDEBUG>"
+	)
+
+	# ----- Print which flags used -----
+	message("- Use Macro Definitions: ${ALL}")
+
+	# ----- Add flags to target -----
+	target_compile_definitions(${targetName} INTERFACE ${OPTIONS})
+endfunction()
+
+# Add macros to the target specific for windows development.
+function(set_target_options_macros_win targetName)
+	set(OPTIONS
+		NOMINMAX                            # Disable min and max macros from the MFC STL.
+		WIN32_LEAN_AND_MEAN                 # Exclude rarely used includes from windows.h such as Cryptography, DDE, RPC, Shell, and Windows Sockets.
+		VC_EXTRALEAN                        # Exclude rarely used includes from MFC headers.
+		STRICT                              # Strict type checking in winapi. Helps us write more portable code.
+		STRICT_TYPED_ITEMIDS                # Strict type checking in shell headers. Helps us write more portable code.
+		_ATL_CSTRING_EXPLICIT_CONSTRUCTORS  # Makes certain CString constructors explicit.
+		_ATL_ALL_WARNINGS                   # Enables warnings that were disabled in old versions of ATL.
+		_AFX_ALL_WARNINGS                   # Enables all warnings hidden by MFC
+	)
+
+	# ----- Print which flags used -----
+	message("- Use Win Macro Definitions: ${OPTIONS}")
+
+	# ----- Add flags to target -----
+	target_compile_definitions(${targetName} INTERFACE ${OPTIONS})
+endfunction()

@@ -3,7 +3,8 @@ include_guard(GLOBAL)
 # TODO: Include minimal
 include("${CMAKE_CURRENT_LIST_DIR}/ConfigDefault.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/ConfigDefaultWin.cmake")
-# TODO: Include CLR
+include("${CMAKE_CURRENT_LIST_DIR}/ConfigCLR.cmake")
+
 
 # Configuration Names
 #  Empty:      No extra configuration.
@@ -21,6 +22,8 @@ function(set_target_configuration targetName configName)
 		endif()
 		message(FATAL_ERROR "Configuration project does not exist: '${configName}'.")
 	endif()
+
+
 
 	target_link_libraries(${targetName} PRIVATE ${configName})
 endfunction()

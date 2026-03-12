@@ -5,7 +5,9 @@
 cmake_minimum_required(VERSION 3.27)
 
 include_guard(GLOBAL)
-include("${CMAKE_CURRENT_LIST_DIR}/CompilerWarnings.cmake")
+
+
+include("${CMAKE_CURRENT_LIST_DIR}/GlobalDefaults.cmake")
 
 # ----- Helper function for configuration -----
 # TODO: Move flags for gcc and clang
@@ -169,21 +171,6 @@ function(set_target_options_linker targetName)
 endfunction()
 
 
-function(set_target_options_macros targetName)
-	set(ALL
-		"$<$<CONFIG:Debug>:_DEBUG>"
-		"$<$<CONFIG:Release>:NDEBUG>"
-	)
-
-	# ----- Print which flags used -----
-	message("- Use Macro Definitions: ${ALL}")
-
-	# ----- Add flags to target -----
-	target_compile_definitions(${targetName} INTERFACE ${OPTIONS})
-endfunction()
-
-
-
 message("----- Configuration Default -----")
 message("---------------------------------")
 message("- Use ALIAS:             Config::Default")
@@ -197,5 +184,5 @@ target_compile_features(${targetName} INTERFACE cxx_std_20)  # Special features
 set_target_options_warnings(${targetName})                   # Warning  Flags
 set_target_options_compiler(${targetName})                   # Compiler Flags
 set_target_options_linker(${targetName})                     # Linker   Flags
-set_target_options_macros(${targetName})                     # Macro definitions
+set_target_options_macros_default(${targetName})             # Macro definitions
 
