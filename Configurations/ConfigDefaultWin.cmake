@@ -29,6 +29,7 @@ function(_set_target_options_macros_win targetName)
 endfunction()
 
 
+message("")
 message("----- Configuration Default Windows -----")
 message("-----------------------------------------")
 message("- Use ALIAS:             Config::DefaultWin")

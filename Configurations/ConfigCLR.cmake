@@ -111,7 +111,7 @@ function(_fix_runtime_library_for_clr TARGET_NAME)
 	endif()
 
 	# Scrub global flag bleed-in for this target specifically
-	target_compile_options(${TARGET_NAME} PRIVATE
+	target_compile_options(${TARGET_NAME} INTERFACE
 		$<$<CONFIG:Debug>:/MDd>
 		$<$<CONFIG:Release>:/MD>
 		$<$<CONFIG:RelWithDebInfo>:/MD>
@@ -126,6 +126,7 @@ endif()
 # TODO: Test whether target defines /MT[d] -> Remove and add /MD[d]
 
 
+message("")
 message("----- Configuration CLR -----")
 message("-----------------------------")
 message("- Use ALIAS:             Config::CLR")

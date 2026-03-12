@@ -144,9 +144,9 @@ function(_set_target_options_linker_def targetName)
 	set(OPTIONS_RELEASE_DEBINFO)
 
 	if(MSVC)                                         # MSVC
-		set(OPTIONS_DEBUG   ${MSVC_DEBUG})
-		set(OPTIONS_RELEASE ${MSVC_RELEASE})
-		set(OPTIONS_RELEASE ${MSVC_RELEASE_DEBINFO})
+		set(OPTIONS_DEBUG           ${MSVC_DEBUG})
+		set(OPTIONS_RELEASE         ${MSVC_RELEASE})
+		set(OPTIONS_RELEASE_DEBINFO ${MSVC_RELEASE_DEBINFO})
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")     # GCC
 		set(OPTIONS_DEBUG   ${GCC_DEBUG})
 		set(OPTIONS_RELEASE ${GCC_RELEASE})
@@ -171,6 +171,7 @@ function(_set_target_options_linker_def targetName)
 endfunction()
 
 
+message("")
 message("----- Configuration Default -----")
 message("---------------------------------")
 message("- Use ALIAS:             Config::Default")

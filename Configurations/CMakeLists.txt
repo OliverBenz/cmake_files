@@ -1,4 +1,7 @@
+cmake_minimum_required(VERSION 3.27)
+
 include_guard(GLOBAL)
+
 
 include("${CMAKE_CURRENT_LIST_DIR}/ConfigMinimal.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/ConfigDefault.cmake")
