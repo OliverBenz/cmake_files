@@ -1,5 +1,10 @@
-include_guard(GLOBAL)
+# Description:
+#  - Compiler/Linker: Parallel Build, Whole Program Optimization, Extra debug information and checks, explicitly set defaults.
+#  - Macros:          Only _DEBUG and NDEBUG macros
+#  - Warnings:        W4 and extra important warnings
+cmake_minimum_required(VERSION 3.27)
 
+include_guard(GLOBAL)
 include("${CMAKE_CURRENT_LIST_DIR}/CompilerWarnings.cmake")
 
 # ----- Helper function for configuration -----
@@ -7,8 +12,8 @@ include("${CMAKE_CURRENT_LIST_DIR}/CompilerWarnings.cmake")
 # TODO: RelWithDebInfo for gcc and clang
 # TODO: MinSizeRel
 function(set_target_options_compiler targetName)
-    # ----- Setup variables -----
-    # MSVC compiler flags
+	# ----- Setup variables -----
+	# ----- MSVC compiler flags
 	set(MSVC_ALL
 		/W4            # Enable warning level 4.
 		/MP            # Enable multiprocessor compilation.
@@ -21,79 +26,83 @@ function(set_target_options_compiler targetName)
 		/permissive-   # Enforce ISO C++ standard compliance.
 	)
 
-	# TODO: Whole program optimization per target
-
-    set(MSVC_DEBUG
+	set(MSVC_DEBUG
 		${MSVC_ALL}
-        /Od   # Optimization disabled. Fast compilation and simplify debugging.
+		/Od   # Optimization disabled. Fast compilation and simplify debugging.
 		/RTC1 # Enable Runtime Error Checks. Equivalent to RTCsu.
 		/Gy   # Enable Function-Level Linking. Auto-Set by /ZI
 		/ZI   # Produce a PDB that supports the Edit and Continue feature. Auto-Sets: /Gy in linker
-    )
-    set(MSVC_RELEASE
+	)
+	set(MSVC_RELEASE
 		${MSVC_ALL}
-        /O2   # Optimization for speed.            Auto-Sets:  /Gy
+		/O2   # Optimization for speed.            Auto-Sets:  /Gy
 		/Gy   # Enable Function-Level Linking.     Auto-Set by /O2
 		/GL   # Enable whole program optimization. Auto-Sets: linker /LTCG
-    )
+	)
 	set(MSVC_RELEASE_DEBINFO
 		${MSVC_RELEASE}
 		/Zi   # Produce a PDB that contains all the symbolic debugging information.
 	)
 
-    # GCC compiler flags
+	# ----- GCC compiler flags
 	# TODO: GCC_ALL for more flags
 	# TODO: GCC_RELEASE_DEBINFO
-    set(GCC_DEBUG
-        -Og  # No optimization
-        -g   # Create debugging information
-    )
-    set(GCC_RELEASE
-        -O3  # Maximize optimization
-        -g   # Create debugging information (May sometimes be weird because of optimization)
-    )
+	set(GCC_DEBUG
+		-Og  # No optimization
+		-g   # Create debugging information
+	)
+	set(GCC_RELEASE
+		-O3  # Maximize optimization
+	)
+	set(GCC_RELEASE_DEBINFO
+		-O3  # Maximize optimization
+		-g   # Create debugging information
+	)
 
-    # Clang compiler flags
+	# ----- Clang compiler flags
 	# TODO: CLANG_ALL for more flags
 	# TODO: CLANG_RELEASE_DEBINFO
-    set(CLANG_DEBUG
-        -Og  # No optimization
-        -g   # Create debugging information
-    )
-    set(CLANG_RELEASE
-        -O3  # Maximize optimization
-        -g   # Create debugging information (May sometimes be weird because of optimization)
-    )
+	set(CLANG_DEBUG
+		-Og  # No optimization
+		-g   # Create debugging information
+	)
+	set(CLANG_RELEASE
+		-O3  # Maximize optimization
+	)
+	set(CLANG_RELEASE_DEBINFO
+		-O3  # Maximize optimization
+		-g   # Create debugging information (May sometimes be weird because of optimization)
+	)
 
-    # ----- Switch which variables to use -----
-    # Use the correct set of options depending on the compiler
-    set(OPTIONS_DEBUG)
-    set(OPTIONS_RELEASE)
+	# ----- Switch which variables to use -----
+	# Use the correct set of options depending on the compiler
+	set(OPTIONS_DEBUG)
+	set(OPTIONS_RELEASE)
 	set(OPTIONS_RELEASE_DEBINFO)
 
-    if(MSVC)                                         # MSVC
-        set(OPTIONS_DEBUG   ${MSVC_DEBUG})
-        set(OPTIONS_RELEASE ${MSVC_RELEASE})
-		set(OPTIONS_RELEASE ${MSVC_RELEASE_DEBINFO})
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")     # GCC
-        set(OPTIONS_DEBUG   ${GCC_DEBUG})
-        set(OPTIONS_RELEASE ${GCC_RELEASE})
-		# TODO: DEBINFO
-    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")  # Clang / AppleClang
-        set(OPTIONS_DEBUG   ${CLANG_DEBUG})
-        set(OPTIONS_RELEASE ${CLANG_RELEASE})
-		# TODO: DEBINFO
-    else()                                           # Else
-        message(AUTHOR_WARNING "No extra compiler flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
-    endif()
+	if(MSVC)                                         # MSVC
+		set(OPTIONS_DEBUG           ${MSVC_DEBUG})
+		set(OPTIONS_RELEASE         ${MSVC_RELEASE})
+		set(OPTIONS_RELEASE_DEBINFO ${MSVC_RELEASE_DEBINFO})
+	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")     # GCC
+		set(OPTIONS_DEBUG           ${GCC_DEBUG})
+		set(OPTIONS_RELEASE         ${GCC_RELEASE})
+		set(OPTIONS_RELEASE_DEBINFO ${GCC_RELEASE_DEBINFO})
+	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")    # Clang / AppleClang
+		set(OPTIONS_DEBUG           ${CLANG_DEBUG})
+		set(OPTIONS_RELEASE         ${CLANG_RELEASE})
+		set(OPTIONS_RELEASE_DEBINFO ${CLANG_RELEASE_DEBINFO})
+	else()                                           # Else
+		message(AUTHOR_WARNING "No extra compiler flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
+	endif()
 
 
-    # ----- Print which flags used -----
-    message(STATUS "- Compiler flags for Debug          ${OPTIONS_DEBUG}")
-    message(STATUS "- Compiler flags for Release        ${OPTIONS_RELEASE}")
+	# ----- Print which flags used -----
+	message(STATUS "- Compiler flags for Debug          ${OPTIONS_DEBUG}")
+	message(STATUS "- Compiler flags for Release        ${OPTIONS_RELEASE}")
 	message(STATUS "- Compiler flags for RelWithDebInfo ${OPTIONS_RELEASE_DEBINFO}")
 
-    # ----- Add flags to target -----
+	# ----- Add flags to target -----
 	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:Debug>:${OPTIONS_DEBUG}>")
 	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:Release>:${OPTIONS_RELEASE}>")
 	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:RelWithDebInfo>:${OPTIONS_RELEASE_DEBINFO}>")
@@ -101,9 +110,9 @@ endfunction()
 
 
 function(set_target_options_linker targetName)
-    # ----- Setup variables -----
+	# ----- Setup variables -----
 
-    # MSVC linker flags
+	# MSVC linker flags
 	set(MSVC_DEBUG
 		/DEBUG       # Create a debugging information file for the executable.
 		/INCREMENTAL # Link incrementally. Don't always perform a full link.
@@ -132,28 +141,28 @@ function(set_target_options_linker targetName)
 	set(OPTIONS_RELEASE)
 	set(OPTIONS_RELEASE_DEBINFO)
 
-    if(MSVC)                                         # MSVC
-        set(OPTIONS_DEBUG   ${MSVC_DEBUG})
-        set(OPTIONS_RELEASE ${MSVC_RELEASE})
+	if(MSVC)                                         # MSVC
+		set(OPTIONS_DEBUG   ${MSVC_DEBUG})
+		set(OPTIONS_RELEASE ${MSVC_RELEASE})
 		set(OPTIONS_RELEASE ${MSVC_RELEASE_DEBINFO})
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")     # GCC
-        set(OPTIONS_DEBUG   ${GCC_DEBUG})
-        set(OPTIONS_RELEASE ${GCC_RELEASE})
+	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")     # GCC
+		set(OPTIONS_DEBUG   ${GCC_DEBUG})
+		set(OPTIONS_RELEASE ${GCC_RELEASE})
 		# TODO: DEBINFO
-    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")  # Clang / AppleClang
-        set(OPTIONS_DEBUG   ${CLANG_DEBUG})
-        set(OPTIONS_RELEASE ${CLANG_RELEASE})
+	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")  # Clang / AppleClang
+		set(OPTIONS_DEBUG   ${CLANG_DEBUG})
+		set(OPTIONS_RELEASE ${CLANG_RELEASE})
 		# TODO: DEBINFO
-    else()                                           # Else
-        message(AUTHOR_WARNING "No extra linker flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
-    endif()
+	else()                                           # Else
+		message(AUTHOR_WARNING "No extra linker flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
+	endif()
 
-    # ----- Print which flags used -----
+	# ----- Print which flags used -----
 	message(STATUS "- Linker flags for Debug          ${OPTIONS_DEBUG}")
 	message(STATUS "- Linker flags for Release        ${OPTIONS_RELEASE}")
 	message(STATUS "- Linker flags for RelWithDebInfo ${OPTIONS_RELEASE_DEBINFO}")
 
-    # ----- Add flags to target -----
+	# ----- Add flags to target -----
 	target_link_options(${targetName} INTERFACE "$<$<CONFIG:Debug>:${OPTIONS_DEBUG}>")
 	target_link_options(${targetName} INTERFACE "$<$<CONFIG:Release>:${OPTIONS_RELEASE}>")
 	target_link_options(${targetName} INTERFACE "$<$<CONFIG:RelWithDebInfo>:${OPTIONS_RELEASE_DEBINFO}>")
@@ -166,10 +175,10 @@ function(set_target_options_macros targetName)
 		"$<$<CONFIG:Release>:NDEBUG>"
 	)
 
-    # ----- Print which flags used -----
+	# ----- Print which flags used -----
 	message("- Use Macro Definitions: ${ALL}")
 
-    # ----- Add flags to target -----
+	# ----- Add flags to target -----
 	target_compile_definitions(${targetName} INTERFACE ${OPTIONS})
 endfunction()
 

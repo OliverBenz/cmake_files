@@ -1,14 +1,16 @@
+# Description:
+#  - Default Configuration + WINDOWS/MFC/ATL macros defined.
+cmake_minimum_required(VERSION 3.27)
+
 include_guard(GLOBAL)
+
 
 include("${CMAKE_CURRENT_LIST_DIR}/ConfigDefault.cmake")
 
 function(set_target_options_macros targetName)
-	set(ALL
+	set(OPTIONS
 		"$<$<CONFIG:Debug>:_DEBUG>"
 		"$<$<CONFIG:Release>:NDEBUG>"
-	)
-	set(MSVC_FLAGS
-		${ALL}
 		NOMINMAX                            # Disable min and max macros from the MFC STL.
 		WIN32_LEAN_AND_MEAN                 # Exclude rarely used includes from windows.h such as Cryptography, DDE, RPC, Shell, and Windows Sockets.
 		VC_EXTRALEAN                        # Exclude rarely used includes from MFC headers.
@@ -19,24 +21,10 @@ function(set_target_options_macros targetName)
 		_AFX_ALL_WARNINGS                   # Enables all warnings hidden by MFC
 	)
 
-	# TODO: Clang and gcc different?
+	# ----- Print which flags used -----
+	message("- Use Macro Definitions: ${OPTIONS}")
 
-	set(OPTIONS)
-
-    if(MSVC)                                         # MSVC
-		set(OPTIONS ${MSVC_FLAGS})
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")     # GCC
-		set(OPTIONS ${MSVC_FLAGS})
-    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")    # Clang / AppleClang
-		set(OPTIONS ${MSVC_FLAGS})
-    else()                                           # Else
-        message(AUTHOR_WARNING "No extra macro definitions set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
-    endif()
-
-    # ----- Print which flags used -----
-	message("- Use Macro Definitions: ${OPTIONS_DEBUG}")
-
-    # ----- Add flags to target -----
+	# ----- Add flags to target -----
 	target_compile_definitions(${targetName} INTERFACE ${OPTIONS})
 endfunction()
 
