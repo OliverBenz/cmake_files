@@ -7,7 +7,7 @@ include_guard(GLOBAL)
 
 include("${CMAKE_CURRENT_LIST_DIR}/ConfigDefault.cmake")
 
-function(set_target_options_macros targetName)
+function(_set_target_options_macros_win targetName)
 	set(OPTIONS
 		"$<$<CONFIG:Debug>:_DEBUG>"
 		"$<$<CONFIG:Release>:NDEBUG>"
@@ -41,5 +41,5 @@ add_library(${targetName} INTERFACE)
 add_library(Config::DefaultWin ALIAS ${targetName})
 
 target_link_libraries(${targetName} INTERFACE Config::Default) # Same base configuration as Config::Default
-set_target_options_macros_win(${targetName})                   # Macro definitions
+_set_target_options_macros_win(${targetName})                  # Macro definitions
 

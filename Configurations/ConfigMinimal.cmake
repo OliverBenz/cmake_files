@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.27)
 include_guard(GLOBAL)
 
 
-function(set_target_options_compiler targetName)
+function(_set_target_options_compiler_min targetName)
 	# ----- Setup variables -----
 	# MSVC compiler flags
 	set(MSVC_ALL
@@ -90,7 +90,7 @@ function(set_target_options_compiler targetName)
 	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:RelWithDebInfo>:${OPTIONS_RELEASE_DEBINFO}>")
 endfunction()
 
-function(set_target_options_linker targetName)
+function(_set_target_options_linker_min targetName)
 	# ----- Setup variables -----
 
 	# MSVC linker flags
@@ -156,6 +156,6 @@ add_library(${targetName} INTERFACE)
 add_library(Config::Minimal ALIAS ${targetName})
 
 target_compile_features(${targetName} INTERFACE cxx_std_20)  # Special features
-set_target_options_compiler(${targetName})                   # Compiler Flags
-set_target_options_linker(${targetName})                     # Linker   Flags
+_set_target_options_compiler_min(${targetName})              # Compiler Flags
+_set_target_options_linker_min(${targetName})                # Linker   Flags
 set_target_options_macros_default(${targetName})             # Macro definitions

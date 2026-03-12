@@ -3,6 +3,11 @@
 #    Adds /clr compilation for windows 
 #  - Macros:          Only _DEBUG and NDEBUG macros
 #  - Warnings:        W4 and extra important warnings
+# Compatibility notes:
+#  - MSVC  only
+#  - /ZI   not compatible with /clr. Using /Zi
+#  - /MT   not compatible with /clr. Ensure /MD[d]  See: _fix_runtime_library_for_clr
+#  - /EHsc not compatible with /clr. Use /EHa
 cmake_minimum_required(VERSION 3.27)
 
 include_guard(GLOBAL)
@@ -11,30 +16,25 @@ include_guard(GLOBAL)
 include("${CMAKE_CURRENT_LIST_DIR}/GlobalDefaults.cmake")
 
 # ----- Helper function for configuration -----
-# TODO: Move flags for gcc and clang
-# TODO: RelWithDebInfo for gcc and clang
 # TODO: MinSizeRel
-function(set_target_options_compiler targetName)
+function(_set_target_options_compiler_clr targetName)
 	# ----- Setup variables -----
-	# ----- MSVC compiler flags
 	set(MSVC_ALL
+		/clr           # 
 		/W4            # Enable warning level 4.
 		/MP            # Enable multiprocessor compilation.
 		/FS            # Force synchronous .pdb file write. Required for /MP.
 		/GS            # Buffer Security Check enabled.
 		/GR            # Adds code to check object types at run time. On by default.
 		/Gd            # Calling Convention. Explicitly use default (/Gd -> __cdecl).
-		/EHsc          # Exception handling model. 's' .. Standard stack unwinding and 'c' .. extern "C" functions never throw C++ exceptions.
+		/EHa           # Exception handling model. 'a' .. Catches both structured and standard C++ exceptions.
 		/fp:precise    # Floating-point behavior precise. Explicitly use default: precise.
 		/permissive-   # Enforce ISO C++ standard compliance.
 	)
-
 	set(MSVC_DEBUG
 		${MSVC_ALL}
 		/Od   # Optimization disabled. Fast compilation and simplify debugging.
-		/RTC1 # Enable Runtime Error Checks. Equivalent to RTCsu.
-		/Gy   # Enable Function-Level Linking. Auto-Set by /ZI
-		/ZI   # Produce a PDB that supports the Edit and Continue feature. Auto-Sets: /Gy in linker
+		/Zi   # Produce a PDB that contains all the symbolic debugging information. /ZI incompatible with /clr
 	)
 	set(MSVC_RELEASE
 		${MSVC_ALL}
@@ -47,75 +47,20 @@ function(set_target_options_compiler targetName)
 		/Zi   # Produce a PDB that contains all the symbolic debugging information.
 	)
 
-	# ----- GCC compiler flags
-	# TODO: GCC_ALL for more flags
-	# TODO: GCC_RELEASE_DEBINFO
-	set(GCC_DEBUG
-		-Og  # No optimization
-		-g   # Create debugging information
-	)
-	set(GCC_RELEASE
-		-O3  # Maximize optimization
-	)
-	set(GCC_RELEASE_DEBINFO
-		-O3  # Maximize optimization
-		-g   # Create debugging information
-	)
-
-	# ----- Clang compiler flags
-	# TODO: CLANG_ALL for more flags
-	# TODO: CLANG_RELEASE_DEBINFO
-	set(CLANG_DEBUG
-		-Og  # No optimization
-		-g   # Create debugging information
-	)
-	set(CLANG_RELEASE
-		-O3  # Maximize optimization
-	)
-	set(CLANG_RELEASE_DEBINFO
-		-O3  # Maximize optimization
-		-g   # Create debugging information (May sometimes be weird because of optimization)
-	)
-
-	# ----- Switch which variables to use -----
-	# Use the correct set of options depending on the compiler
-	set(OPTIONS_DEBUG)
-	set(OPTIONS_RELEASE)
-	set(OPTIONS_RELEASE_DEBINFO)
-
-	if(MSVC)                                         # MSVC
-		set(OPTIONS_DEBUG           ${MSVC_DEBUG})
-		set(OPTIONS_RELEASE         ${MSVC_RELEASE})
-		set(OPTIONS_RELEASE_DEBINFO ${MSVC_RELEASE_DEBINFO})
-	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")     # GCC
-		set(OPTIONS_DEBUG           ${GCC_DEBUG})
-		set(OPTIONS_RELEASE         ${GCC_RELEASE})
-		set(OPTIONS_RELEASE_DEBINFO ${GCC_RELEASE_DEBINFO})
-	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")    # Clang / AppleClang
-		set(OPTIONS_DEBUG           ${CLANG_DEBUG})
-		set(OPTIONS_RELEASE         ${CLANG_RELEASE})
-		set(OPTIONS_RELEASE_DEBINFO ${CLANG_RELEASE_DEBINFO})
-	else()                                           # Else
-		message(AUTHOR_WARNING "No extra compiler flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
-	endif()
-
-
 	# ----- Print which flags used -----
-	message(STATUS "- Compiler flags for Debug          ${OPTIONS_DEBUG}")
-	message(STATUS "- Compiler flags for Release        ${OPTIONS_RELEASE}")
-	message(STATUS "- Compiler flags for RelWithDebInfo ${OPTIONS_RELEASE_DEBINFO}")
+	message(STATUS "- Compiler flags for Debug          ${MSVC_DEBUG}")
+	message(STATUS "- Compiler flags for Release        ${MSVC_RELEASE}")
+	message(STATUS "- Compiler flags for RelWithDebInfo ${MSVC_RELEASE_DEBINFO}")
 
 	# ----- Add flags to target -----
-	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:Debug>:${OPTIONS_DEBUG}>")
-	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:Release>:${OPTIONS_RELEASE}>")
-	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:RelWithDebInfo>:${OPTIONS_RELEASE_DEBINFO}>")
+	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:Debug>:${MSVC_DEBUG}>")
+	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:Release>:${MSVC_RELEASE}>")
+	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:RelWithDebInfo>:${MSVC_RELEASE_DEBINFO}>")
 endfunction()
 
 
-function(set_target_options_linker targetName)
+function(_set_target_options_linker_clr targetName)
 	# ----- Setup variables -----
-
-	# MSVC linker flags
 	set(MSVC_DEBUG
 		/DEBUG       # Create a debugging information file for the executable.
 		/INCREMENTAL # Link incrementally. Don't always perform a full link.
@@ -134,47 +79,51 @@ function(set_target_options_linker targetName)
 		${MSVC_RELEASE}  # Ensure /OPT explicitly set. Default off due to /DEBUG.
 	)
 
-	# GCC linker flags
-	# TODO
-
-	# Clang linker flags
-	# TODO
-
-	set(OPTIONS_DEBUG)
-	set(OPTIONS_RELEASE)
-	set(OPTIONS_RELEASE_DEBINFO)
-
-	if(MSVC)                                         # MSVC
-		set(OPTIONS_DEBUG   ${MSVC_DEBUG})
-		set(OPTIONS_RELEASE ${MSVC_RELEASE})
-		set(OPTIONS_RELEASE ${MSVC_RELEASE_DEBINFO})
-	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")     # GCC
-		set(OPTIONS_DEBUG   ${GCC_DEBUG})
-		set(OPTIONS_RELEASE ${GCC_RELEASE})
-		# TODO: DEBINFO
-	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")  # Clang / AppleClang
-		set(OPTIONS_DEBUG   ${CLANG_DEBUG})
-		set(OPTIONS_RELEASE ${CLANG_RELEASE})
-		# TODO: DEBINFO
-	else()                                           # Else
-		message(AUTHOR_WARNING "No extra linker flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
-	endif()
-
 	# ----- Print which flags used -----
-	message(STATUS "- Linker flags for Debug          ${OPTIONS_DEBUG}")
-	message(STATUS "- Linker flags for Release        ${OPTIONS_RELEASE}")
-	message(STATUS "- Linker flags for RelWithDebInfo ${OPTIONS_RELEASE_DEBINFO}")
+	message(STATUS "- Linker flags for Debug          ${MSVC_DEBUG}")
+	message(STATUS "- Linker flags for Release        ${MSVC_RELEASE}")
+	message(STATUS "- Linker flags for RelWithDebInfo ${MSVC_RELEASE_DEBINFO}")
 
 	# ----- Add flags to target -----
-	target_link_options(${targetName} INTERFACE "$<$<CONFIG:Debug>:${OPTIONS_DEBUG}>")
-	target_link_options(${targetName} INTERFACE "$<$<CONFIG:Release>:${OPTIONS_RELEASE}>")
-	target_link_options(${targetName} INTERFACE "$<$<CONFIG:RelWithDebInfo>:${OPTIONS_RELEASE_DEBINFO}>")
+	target_link_options(${targetName} INTERFACE "$<$<CONFIG:Debug>:${MSVC_DEBUG}>")
+	target_link_options(${targetName} INTERFACE "$<$<CONFIG:Release>:${MSVC_RELEASE}>")
+	target_link_options(${targetName} INTERFACE "$<$<CONFIG:RelWithDebInfo>:${MSVC_RELEASE_DEBINFO}>")
 endfunction()
 
+
+# TODO: Test this guy
+function(_fix_runtime_library_for_clr TARGET_NAME)
+	if(NOT "${MSVC}")
+		message(AUTHOR_WARNING "MSVC only configuration!") #What are you even doing?
+		return()
+	endif()
+
+	# Force /MD (Release) and /MDd (Debug) — required for /clr
+	set_target_properties(${TARGET_NAME} PROPERTIES
+		MSVC_RUNTIME_LIBRARY "MultiThreadedDLL$<$<CONFIG:Debug>:Debug>"
+	)
+
+	# Scrub any /MT[d] that may have leaked in via COMPILE_OPTIONS
+	get_target_property(OPTS ${TARGET_NAME} COMPILE_OPTIONS)
+	if(OPTS AND NOT OPTS STREQUAL "OPTS-NOTFOUND")
+		list(FILTER OPTS EXCLUDE REGEX "/MT[d]?$")
+		set_target_properties(${TARGET_NAME} PROPERTIES COMPILE_OPTIONS "${OPTS}")
+	endif()
+
+	# Scrub global flag bleed-in for this target specifically
+	target_compile_options(${TARGET_NAME} PRIVATE
+		$<$<CONFIG:Debug>:/MDd>
+		$<$<CONFIG:Release>:/MD>
+		$<$<CONFIG:RelWithDebInfo>:/MD>
+		$<$<CONFIG:MinSizeRel>:/MD>
+	)
+endfunction()
 
 if(NOT "${MSVC}")
 	return() # CLR Configuration only exists for MSVC
 endif()
+
+# TODO: Test whether target defines /MT[d] -> Remove and add /MD[d]
 
 
 message("----- Configuration CLR -----")
@@ -188,8 +137,10 @@ add_library(Config::CLR ALIAS ${targetName})
 
 target_compile_features(${targetName} INTERFACE cxx_std_20)  # Special features
 set_target_options_warnings(${targetName})                   # Warning  Flags
-set_target_options_compiler(${targetName})                   # Compiler Flags
-set_target_options_linker(${targetName})                     # Linker   Flags
+_set_target_options_compiler_clr(${targetName})              # Compiler Flags
+_set_target_options_linker_clr(${targetName})                # Linker   Flags
 
 set_target_options_macros_default(${targetName})             # Macro definitions
 set_target_options_macros_win(${targetName})                 # Windows dev macros
+
+_fix_runtime_library_for_clr(${targetName})                  # Replace /MT[d] with /MD[d]. /MT incompatible with /clr

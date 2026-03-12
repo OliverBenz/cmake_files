@@ -13,7 +13,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/GlobalDefaults.cmake")
 # TODO: Move flags for gcc and clang
 # TODO: RelWithDebInfo for gcc and clang
 # TODO: MinSizeRel
-function(set_target_options_compiler targetName)
+function(_set_target_options_compiler_def targetName)
 	# ----- Setup variables -----
 	# ----- MSVC compiler flags
 	set(MSVC_ALL
@@ -111,7 +111,7 @@ function(set_target_options_compiler targetName)
 endfunction()
 
 
-function(set_target_options_linker targetName)
+function(_set_target_options_linker_def targetName)
 	# ----- Setup variables -----
 
 	# MSVC linker flags
@@ -182,7 +182,7 @@ add_library(Config::Default ALIAS ${targetName})
 
 target_compile_features(${targetName} INTERFACE cxx_std_20)  # Special features
 set_target_options_warnings(${targetName})                   # Warning  Flags
-set_target_options_compiler(${targetName})                   # Compiler Flags
-set_target_options_linker(${targetName})                     # Linker   Flags
+_set_target_options_compiler_def(${targetName})              # Compiler Flags
+_set_target_options_linker_def(${targetName})                # Linker   Flags
 set_target_options_macros_default(${targetName})             # Macro definitions
 
