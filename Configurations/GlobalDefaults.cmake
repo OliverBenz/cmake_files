@@ -1,5 +1,4 @@
 # Sets the most useful compiler warning tags for different compilers for each specific target.
-# Source: https://github.com/lefticus/cppbestpractices/blob/master/02-Use_the_Tools_Available.md
 
 # Use this function only on the predefined interface libraries.
 function(set_target_options_warnings targetName)
