@@ -1,6 +1,8 @@
 include_guard(GLOBAL)
 
-# TODO: Whole program optimization
+include("${CMAKE_CURRENT_LIST_DIR}/CompilerWarnings.cmake")
+
+# ----- Helper function for configuration -----
 # TODO: Move flags for gcc and clang
 # TODO: RelWithDebInfo for gcc and clang
 # TODO: MinSizeRel
@@ -30,8 +32,9 @@ function(set_target_options_compiler targetName)
     )
     set(MSVC_RELEASE
 		${MSVC_ALL}
-        /O2   # Optimization for speed.        Auto-Sets:  /Gy
-		/Gy   # Enable Function-Level Linking. Auto-Set by /O2
+        /O2   # Optimization for speed.            Auto-Sets:  /Gy
+		/Gy   # Enable Function-Level Linking.     Auto-Set by /O2
+		/GL   # Enable whole program optimization. Auto-Sets: linker /LTCG
     )
 	set(MSVC_RELEASE_DEBINFO
 		${MSVC_RELEASE}
@@ -86,9 +89,9 @@ function(set_target_options_compiler targetName)
 
 
     # ----- Print which flags used -----
-    message(STATUS "Compiler flags for Debug          ${OPTIONS_DEBUG}")
-    message(STATUS "Compiler flags for Release        ${OPTIONS_RELEASE}")
-	message(STATUS "Compiler flags for RelWithDebInfo ${OPTIONS_RELEASE_DEBINFO}")
+    message(STATUS "- Compiler flags for Debug          ${OPTIONS_DEBUG}")
+    message(STATUS "- Compiler flags for Release        ${OPTIONS_RELEASE}")
+	message(STATUS "- Compiler flags for RelWithDebInfo ${OPTIONS_RELEASE_DEBINFO}")
 
     # ----- Add flags to target -----
 	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:Debug>:${OPTIONS_DEBUG}>")
@@ -108,6 +111,7 @@ function(set_target_options_linker targetName)
 		/OPT:NOICF   # Disable identical COMDAT folding. Set by default when /DEBUG is specified.
 	)
 	set(MSVC_RELEASE
+		/LTCG           # Link-time code generation. For WholeProgramOptimization.
 		/INCREMENTAL:NO # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
 		/OPT:REF        # Remove unreferenced functions.   Set by default unless /DEBUG is specified. Disables /INCREMENTAL
 		/OPT:ICF        # Enable identical COMDAT folding. Set by default unless /DEBUG is specified.
@@ -115,10 +119,7 @@ function(set_target_options_linker targetName)
 	)
 	set(MSVC_RELEASE_DEBINFO
 		/DEBUG           # Create a debugging information file for the executable.
-		/INCREMENTAL:NO  # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
-		/OPT:REF         # Remove unreferenced functions.   Set by default unless /DEBUG is specified. Disables /INCREMENTAL
-		/OPT:ICF         # Enable identical COMDAT folding. Set by default unless /DEBUG is specified.
-		$<$<STREQUAL:${CMAKE_VS_PLATFORM_NAME},Win32>:/SAFESEH>  # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
+		${MSVC_RELEASE}  # Ensure /OPT explicitly set. Default off due to /DEBUG.
 	)
 
 	# GCC linker flags
@@ -148,9 +149,9 @@ function(set_target_options_linker targetName)
     endif()
 
     # ----- Print which flags used -----
-	message(STATUS "Linker flags for Debug          ${OPTIONS_DEBUG}")
-	message(STATUS "Linker flags for Release        ${OPTIONS_RELEASE}")
-	message(STATUS "Linker flags for RelWithDebInfo ${OPTIONS_RELEASE_DEBINFO}")
+	message(STATUS "- Linker flags for Debug          ${OPTIONS_DEBUG}")
+	message(STATUS "- Linker flags for Release        ${OPTIONS_RELEASE}")
+	message(STATUS "- Linker flags for RelWithDebInfo ${OPTIONS_RELEASE_DEBINFO}")
 
     # ----- Add flags to target -----
 	target_link_options(${targetName} INTERFACE "$<$<CONFIG:Debug>:${OPTIONS_DEBUG}>")
@@ -164,31 +165,19 @@ function(set_target_options_macros targetName)
 		"$<$<CONFIG:Debug>:_DEBUG>"
 		"$<$<CONFIG:Release>:NDEBUG>"
 	)
-	set(MSVC_FLAGS
-		${ALL}
-	)
-
-	# TODO: Clang and gcc different?
-
-	set(OPTIONS)
-
-    if(MSVC)                                         # MSVC
-		set(OPTIONS ${MSVC_FLAGS})
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")     # GCC
-		set(OPTIONS ${MSVC_FLAGS})
-    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")    # Clang / AppleClang
-		set(OPTIONS ${MSVC_FLAGS})
-    else()                                           # Else
-        message(AUTHOR_WARNING "No extra macro definitions set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
-    endif()
 
     # ----- Print which flags used -----
-	message(STATUS "Macro definitions: ${OPTIONS_DEBUG}")
+	message("- Use Macro Definitions: ${ALL}")
 
     # ----- Add flags to target -----
 	target_compile_definitions(${targetName} INTERFACE ${OPTIONS})
 endfunction()
 
+
+
+message("----- Configuration Default -----")
+message("---------------------------------")
+message("- Use ALIAS:             Config::Default")
 
 set(targetName "ConfigDefault")
 

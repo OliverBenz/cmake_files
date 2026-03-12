@@ -65,16 +65,20 @@ function(set_target_options_warnings targetName)
             -Wuseless-cast # warn if you perform a cast to the same type
             )
 
+	set(targetWarnings)
     if(MSVC)
-        set(PROJECT_WARNINGS ${MSVC_WARNINGS})
+		set(targetWarnings ${MSVC_WARNINGS})
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        set(PROJECT_WARNINGS ${CLANG_WARNINGS})
+		set(targetWarnings ${CLANG_WARNINGS})
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        set(PROJECT_WARNINGS ${GCC_WARNINGS})
+		set(targetWarnings ${GCC_WARNINGS})
     else()
         message(AUTHOR_WARNING "No compiler warnings set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
     endif()
 
-    message(STATUS "Compiler flags for warnings ${PROJECT_WARNINGS}")
-	target_compile_options(${targetName} INTERFACE ${PROJECT_WARNINGS})
+    # ----- Print which flags used -----
+	message(STATUS "- Enable Warning Settings: ${targetWarnings}")
+
+    # ----- Add flags to target -----
+	target_compile_options(${targetName} INTERFACE ${targetWarnings})
 endfunction()
