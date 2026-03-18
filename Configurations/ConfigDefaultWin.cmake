@@ -10,7 +10,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/ConfigDefault.cmake")
 function(_set_target_options_macros_win targetName)
 	set(OPTIONS
 		"$<$<CONFIG:Debug>:_DEBUG>"
-		"$<$<CONFIG:Release>:NDEBUG>"
+		"$<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:NDEBUG>"
 		NOMINMAX                            # Disable min and max macros from the MFC STL.
 		WIN32_LEAN_AND_MEAN                 # Exclude rarely used includes from windows.h such as Cryptography, DDE, RPC, Shell, and Windows Sockets.
 		VC_EXTRALEAN                        # Exclude rarely used includes from MFC headers.

@@ -81,7 +81,7 @@ endfunction()
 # Add default macros to the target.
 function(set_target_options_macros_default targetName)
 	set(ALL
-		"$<$<CONFIG:Release>:NDEBUG>"
+		"$<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:NDEBUG>"
 	)
 
 	# ----- Print which flags used -----
