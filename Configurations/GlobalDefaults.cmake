@@ -72,7 +72,7 @@ function(set_target_options_warnings targetName)
 	endif()
 
 	# ----- Print which flags used -----
-	message(STATUS "- Enable Warning Settings: ${targetWarnings}")
+	message(STATUS "- Enable Warnings Settings: ${targetWarnings}")
 
 	# ----- Add flags to target -----
 	target_compile_options(${targetName} INTERFACE ${targetWarnings})
