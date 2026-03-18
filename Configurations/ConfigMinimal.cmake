@@ -34,7 +34,7 @@ function(_set_target_options_compiler_min targetName)
 	# GCC compiler flags
 	set(GCC_DEBUG
 		-Og  # No optimization
-		-g   # Create debugging information
+		-g3  # Create debugging information
 	)
 	set(GCC_RELEASE
 		-O3  # Maximize optimization
@@ -48,7 +48,7 @@ function(_set_target_options_compiler_min targetName)
 	# Clang compiler flags
 	set(CLANG_DEBUG
 		-Og  # No optimization
-		-g   # Create debugging information
+		-g3  # Create debugging information
 	)
 	set(CLANG_RELEASE
 		-O3  # Maximize optimization

@@ -6,6 +6,13 @@ cmake_minimum_required(VERSION 3.27)
 
 include_guard(GLOBAL)
 
+# We want to use LLD Linker on Mac/Linux if available
+find_program(LLD_LINKER lld)
+if(LLD_LINKER)
+    message(STATUS "lld found: ${LLD_LINKER} — enabling LLD linker and ICF")
+else()
+    message(STATUS "lld not found — using default linker, ICF disabled")
+endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/GlobalDefaults.cmake")
 
@@ -47,18 +54,31 @@ function(_set_target_options_compiler_def targetName)
 	)
 
 	# ----- GCC compiler flags
-	# TODO: GCC_ALL for more flags
-	# TODO: GCC_RELEASE_DEBINFO
+	set(GCC_ALL
+		-fexceptions              # Exception handling — equivalent to /EHsc
+		-fstack-protector-strong  # Buffer security check — equivalent to /GS
+		-fPIC                     # Position independent code — good default for libraries
+		-pipe                     # Use pipes instead of temp files — speeds up compilation like /MP
+	)
 	set(GCC_DEBUG
-		-Og  # No optimization
-		-g   # Create debugging information
+		${GCC_ALL}
+		-Og                      # No optimization
+		-g3                      # Create debugging information
+		-fno-omit-frame-pointer  # Keep frame pointers — equivalent to /Oy-
+		-fno-inline              # Disable inlining — easier debugging
 	)
 	set(GCC_RELEASE
-		-O3  # Maximize optimization
+		${GCC_ALL}
+		-O3                       # Maximize optimization
+		-fomit-frame-pointer      # Allow omitting frame pointers — release only
+		-flto                     # Link time optimization — equivalent to /GL + /LTCG
+		-ffunction-sections       # Equivalent to /Gy — one section per function
+		-fdata-sections           # Same for data
 	)
 	set(GCC_RELEASE_DEBINFO
-		-O3  # Maximize optimization
-		-g   # Create debugging information
+		${GCC_RELEASE}
+		-g                      # Create debugging information
+		-fno-omit-frame-pointer # Restore frame pointer for profiling
 	)
 
 	# ----- Clang compiler flags
@@ -66,7 +86,7 @@ function(_set_target_options_compiler_def targetName)
 	# TODO: CLANG_RELEASE_DEBINFO
 	set(CLANG_DEBUG
 		-Og  # No optimization
-		-g   # Create debugging information
+		-g3  # Create debugging information
 	)
 	set(CLANG_RELEASE
 		-O3  # Maximize optimization
@@ -134,10 +154,32 @@ function(_set_target_options_linker_def targetName)
 	)
 
 	# GCC linker flags
-	# TODO
+	set(GCC_ALL
+		$<$<BOOL:${LLD_LINKER}>:-fuse-ld=lld>  # Use LLD Linker is available
+	)
+	set(GCC_DEBUG
+		${GCC_ALL}
+		-Wl,--no-gc-sections # Keep all sections — opposite of release, don't strip anything
+	)
+	set(GCC_RELEASE
+		${GCC_ALL}
+		-Wl,--gc-sections # Remove unused sections — equivalent to /OPT:REF
+		$<$<BOOL:${LLD_LINKER}>:-Wl,--icf=all>
+	)
+	set(GCC_RELEASE_DEBINFO
+		${GCC_RELEASE}
+	)
 
 	# Clang linker flags
-	# TODO
+	set(CLANG_DEBUG
+		${GCC_DEBUG}
+	)
+	set(CLANG_RELEASE
+		${GCC_RELEASE}
+	)
+	set(CLANG_RELEASE_DEBINFO
+		${CLANG_RELEASE}
+	)
 
 	set(OPTIONS_DEBUG)
 	set(OPTIONS_RELEASE)
@@ -148,13 +190,13 @@ function(_set_target_options_linker_def targetName)
 		set(OPTIONS_RELEASE         ${MSVC_RELEASE})
 		set(OPTIONS_RELEASE_DEBINFO ${MSVC_RELEASE_DEBINFO})
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")     # GCC
-		set(OPTIONS_DEBUG   ${GCC_DEBUG})
-		set(OPTIONS_RELEASE ${GCC_RELEASE})
-		# TODO: DEBINFO
+		set(OPTIONS_DEBUG           ${GCC_DEBUG})
+		set(OPTIONS_RELEASE         ${GCC_RELEASE})
+		set(OPTIONS_RELEASE_DEBINFO ${GCC_RELEASE_DEBINFO})
 	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")  # Clang / AppleClang
-		set(OPTIONS_DEBUG   ${CLANG_DEBUG})
-		set(OPTIONS_RELEASE ${CLANG_RELEASE})
-		# TODO: DEBINFO
+		set(OPTIONS_DEBUG           ${CLANG_DEBUG})
+		set(OPTIONS_RELEASE         ${CLANG_RELEASE})
+		set(OPTIONS_RELEASE_DEBINFO ${CLANG_RELEASE_DEBINFO})
 	else()                                           # Else
 		message(AUTHOR_WARNING "No extra linker flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
 	endif()

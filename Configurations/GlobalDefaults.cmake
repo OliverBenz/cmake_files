@@ -80,12 +80,35 @@ endfunction()
 
 # Add default macros to the target.
 function(set_target_options_macros_default targetName)
-	set(ALL
-		"$<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:NDEBUG>"
+	set(DEFAULTS
+		"$<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:NDEBUG>" # Standard NDEBUG
+	)
+	set(MSVC_MACROS
+		${DEFAULTS}
+	)
+	set(GCC_MACROS
+		${DEFAULTS}
+		"$<$<CONFIG:Debug>:_GLIBCXX_DEBUG>" # Enable STL debug checks — similar to /RTC1 spirit
+	)
+	set(CLANG_MACROS
+		${DEFAULTS}
+		"$<$<AND:$<CONFIG:Debug>,$<PLATFORM_ID:Darwin>>:_LIBCPP_DEBUG=1>"  # macOS Clang uses libc++
+		"$<$<AND:$<CONFIG:Debug>,$<PLATFORM_ID:Linux>>:_GLIBCXX_DEBUG>"    # Linux Clang uses libstdc++
 	)
 
+	set(OPTIONS)
+	if(MSVC)                                         # MSVC
+		set(OPTIONS ${MSVC_MACROS})
+	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")     # GCC
+		set(OPTIONS   ${GCC_MACROS})
+	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")  # Clang / AppleClang
+		set(OPTIONS   ${CLANG_MACROS})
+	else()                                           # Else
+		message(AUTHOR_WARNING "No extra linker flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
+	endif()
+
 	# ----- Print which flags used -----
-	message(STATUS "- Use Macro Definitions: ${ALL}")
+	message(STATUS "- Use Macro Definitions: ${OPTIONS}")
 
 	# ----- Add flags to target -----
 	target_compile_definitions(${targetName} INTERFACE ${OPTIONS})
