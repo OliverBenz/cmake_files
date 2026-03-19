@@ -7,7 +7,8 @@ cmake_minimum_required(VERSION 3.27)
 include_guard(GLOBAL)
 
 
-include("${CMAKE_CURRENT_LIST_DIR}/ConfigDefault.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/GlobalDefaults.cmake")
+
 
 function(_set_target_options_compiler_min targetName)
 	# ----- Setup variables -----
@@ -43,7 +44,6 @@ function(_set_target_options_compiler_min targetName)
 		-O3  # Maximize optimization
 		-g   # Create debugging information
 	)
-
 
 	# Clang compiler flags
 	set(CLANG_DEBUG
@@ -117,15 +117,28 @@ function(_set_target_options_linker_min targetName)
 	)
 
 	# GCC linker flags
-	# TODO
+	set(GCC_ALL
+		$<$<BOOL:${LLD_LINKER}>:-fuse-ld=lld>  # Use LLD Linker is available
+	)
+	set(GCC_DEBUG
+		${GCC_ALL}
+		-Wl,--no-gc-sections # Keep all sections — opposite of release, don't strip anything
+	)
+	set(GCC_RELEASE
+		${GCC_ALL}
+	)
+	set(GCC_RELEASE_DEBINFO
+		${GCC_RELEASE}
+	)
 
 	# Clang linker flags
-	# TODO
+	set(CLANG_DEBUG           ${GCC_DEBUG})
+	set(CLANG_RELEASE         ${GCC_RELEASE})
+	set(CLANG_RELEASE_DEBINFO ${CLANG_RELEASE})
 
 	set(OPTIONS_DEBUG)
 	set(OPTIONS_RELEASE)
 	set(OPTIONS_RELEASE_DEBINFO)
-
 	if(MSVC)                                         # MSVC
 		set(OPTIONS_DEBUG           ${MSVC_DEBUG})
 		set(OPTIONS_RELEASE         ${MSVC_RELEASE})
@@ -174,4 +187,4 @@ add_library(Config::Minimal ALIAS ${targetName})
 target_compile_features(${targetName} INTERFACE cxx_std_20)  # Special features
 _set_target_options_compiler_min(${targetName})              # Compiler Flags
 _set_target_options_linker_min(${targetName})                # Linker   Flags
-set_target_options_macros_default(${targetName})             # Macro definitions
+set_target_options_macros(${targetName})                     # Macro definitions

@@ -1,3 +1,8 @@
+cmake_minimum_required(VERSION 3.27)
+
+include_guard(GLOBAL)
+
+
 # Use this function only on the predefined interface libraries.
 function(set_target_options_warnings targetName)
 	set(MSVC_WARNINGS
@@ -33,6 +38,7 @@ function(set_target_options_warnings targetName)
 	set(CLANG_WARNINGS
 		-Wall
 		-Wextra                      # Reasonable and standard
+		-Wpedantic                   # Warn if non-standard C++ is used
 		-Wshadow                     # Warn the user if a variable declaration shadows one from a parent context
 		-Wnon-virtual-dtor           # Warn the user if a class with virtual functions has a non-virtual destructor. This helps
 
@@ -41,14 +47,14 @@ function(set_target_options_warnings targetName)
 		-Wcast-align                 # Warn for potential performance problem casts
 		-Wunused                     # Warn on anything being unused
 		-Woverloaded-virtual         # Warn if you overload (not override) a virtual function
-		-Wpedantic                   # Warn if non-standard C++ is used
 		-Wconversion                 # Warn on type conversions that may lose data
 		-Wsign-conversion            # Warn on sign conversions
 		-Wnull-dereference           # Warn if a null dereference is detected
 		-Wdouble-promotion           # Warn if float is implicit promoted to double
 		-Wformat=2                   # Warn on security issues around functions that format output (ie printf)
 
-		$<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:-Werror> # Warnings as errors
+		# Warnings as errors on Release builds
+		$<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:-Werror>
 	)
 
 	set(GCC_WARNINGS
@@ -80,7 +86,7 @@ function(set_target_options_warnings targetName)
 endfunction()
 
 # Add default macros to the target.
-function(set_target_options_macros_default targetName)
+function(set_target_options_macros targetName)
 	set(DEFAULTS
 		"$<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:NDEBUG>" # Standard NDEBUG
 	)

@@ -1,4 +1,5 @@
-# Description:
+# Description: 
+#  - Extends:         Minimal Configuration + more detailed default configuration.
 #  - Compiler/Linker: Parallel Build, Whole Program Optimization, Extra debug information and checks, explicitly set defaults.
 #  - Macros:          Only _DEBUG and NDEBUG macros
 #  - Warnings:        W4 and extra important warnings
@@ -6,15 +7,9 @@ cmake_minimum_required(VERSION 3.27)
 
 include_guard(GLOBAL)
 
-# We want to use LLD Linker on Mac/Linux if available
-find_program(LLD_LINKER lld)
-if(LLD_LINKER)
-    message(STATUS "lld found: ${LLD_LINKER} — enabling LLD linker and ICF")
-else()
-    message(STATUS "lld not found — using default linker, ICF disabled")
-endif()
 
-include("${CMAKE_CURRENT_LIST_DIR}/GlobalDefaults.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/ConfigMinimal.cmake")
+
 
 # ----- Helper function for configuration -----
 # TODO: Test flags for gcc and clang
@@ -25,8 +20,6 @@ function(_set_target_options_compiler_def targetName)
 	# ----- MSVC compiler flags
 	set(MSVC_ALL
 		/W4            # Enable warning level 4.
-		/MP            # Enable multiprocessor compilation.
-		/FS            # Force synchronous .pdb file write. Required for /MP.
 		/GS            # Buffer Security Check enabled.
 		/GR            # Adds code to check object types at run time. On by default.
 		/Gd            # Calling Convention. Explicitly use default (/Gd -> __cdecl).
@@ -37,20 +30,16 @@ function(_set_target_options_compiler_def targetName)
 
 	set(MSVC_DEBUG
 		${MSVC_ALL}
-		/Od   # Optimization disabled. Fast compilation and simplify debugging.
 		/RTC1 # Enable Runtime Error Checks. Equivalent to RTCsu.
 		/Gy   # Enable Function-Level Linking. Auto-Set by /ZI
-		/ZI   # Produce a PDB that supports the Edit and Continue feature. Auto-Sets: /Gy in linker
 	)
 	set(MSVC_RELEASE
 		${MSVC_ALL}
-		/O2   # Optimization for speed.            Auto-Sets:  /Gy
 		/Gy   # Enable Function-Level Linking.     Auto-Set by /O2
 		/GL   # Enable whole program optimization. Auto-Sets: linker /LTCG
 	)
 	set(MSVC_RELEASE_DEBINFO
 		${MSVC_RELEASE}
-		/Zi   # Produce a PDB that contains all the symbolic debugging information.
 	)
 
 	# ----- GCC compiler flags
@@ -62,14 +51,11 @@ function(_set_target_options_compiler_def targetName)
 	)
 	set(GCC_DEBUG
 		${GCC_ALL}
-		-Og                      # No optimization
-		-g3                      # Create debugging information
 		-fno-omit-frame-pointer  # Keep frame pointers — equivalent to /Oy-
 		-fno-inline              # Disable inlining — easier debugging
 	)
 	set(GCC_RELEASE
 		${GCC_ALL}
-		-O3                       # Maximize optimization
 		-fomit-frame-pointer      # Allow omitting frame pointers — release only
 		-flto                     # Link time optimization — equivalent to /GL + /LTCG
 		-ffunction-sections       # Equivalent to /Gy — one section per function
@@ -77,24 +63,16 @@ function(_set_target_options_compiler_def targetName)
 	)
 	set(GCC_RELEASE_DEBINFO
 		${GCC_RELEASE}
-		-g                      # Create debugging information
 		-fno-omit-frame-pointer # Restore frame pointer for profiling
 	)
 
 	# ----- Clang compiler flags
+	# TODO: All gcc options exist also for clang?
 	# TODO: CLANG_ALL for more flags
 	# TODO: CLANG_RELEASE_DEBINFO
-	set(CLANG_DEBUG
-		-Og  # No optimization
-		-g3  # Create debugging information
-	)
-	set(CLANG_RELEASE
-		-O3  # Maximize optimization
-	)
-	set(CLANG_RELEASE_DEBINFO
-		-O3  # Maximize optimization
-		-g   # Create debugging information (May sometimes be weird because of optimization)
-	)
+	set(CLANG_DEBUG           ${GCC_DEBUG})
+	set(CLANG_RELEASE         ${GCC_RELEASE})
+	set(CLANG_RELEASE_DEBINFO ${GCC_RELEASE_DEBINFO})
 
 	# ----- Switch which variables to use -----
 	# Use the correct set of options depending on the compiler
@@ -160,12 +138,9 @@ function(_set_target_options_linker_def targetName)
 	)
 
 	# GCC linker flags
-	set(GCC_ALL
-		$<$<BOOL:${LLD_LINKER}>:-fuse-ld=lld>  # Use LLD Linker is available
-	)
+	set(GCC_ALL)
 	set(GCC_DEBUG
 		${GCC_ALL}
-		-Wl,--no-gc-sections # Keep all sections — opposite of release, don't strip anything
 	)
 	set(GCC_RELEASE
 		${GCC_ALL}
@@ -177,20 +152,13 @@ function(_set_target_options_linker_def targetName)
 	)
 
 	# Clang linker flags
-	set(CLANG_DEBUG
-		${GCC_DEBUG}
-	)
-	set(CLANG_RELEASE
-		${GCC_RELEASE}
-	)
-	set(CLANG_RELEASE_DEBINFO
-		${CLANG_RELEASE}
-	)
+	set(CLANG_DEBUG           ${GCC_DEBUG})
+	set(CLANG_RELEASE         ${GCC_RELEASE})
+	set(CLANG_RELEASE_DEBINFO ${CLANG_RELEASE})
 
 	set(OPTIONS_DEBUG)
 	set(OPTIONS_RELEASE)
 	set(OPTIONS_RELEASE_DEBINFO)
-
 	if(MSVC)                                         # MSVC
 		set(OPTIONS_DEBUG           ${MSVC_DEBUG})
 		set(OPTIONS_RELEASE         ${MSVC_RELEASE})
@@ -199,7 +167,7 @@ function(_set_target_options_linker_def targetName)
 		set(OPTIONS_DEBUG           ${GCC_DEBUG})
 		set(OPTIONS_RELEASE         ${GCC_RELEASE})
 		set(OPTIONS_RELEASE_DEBINFO ${GCC_RELEASE_DEBINFO})
-	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")  # Clang / AppleClang
+	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")    # Clang / AppleClang
 		set(OPTIONS_DEBUG           ${CLANG_DEBUG})
 		set(OPTIONS_RELEASE         ${CLANG_RELEASE})
 		set(OPTIONS_RELEASE_DEBINFO ${CLANG_RELEASE_DEBINFO})
@@ -236,9 +204,9 @@ set(targetName "ConfigDefault")
 add_library(${targetName} INTERFACE)
 add_library(Config::Default ALIAS ${targetName})
 
-target_compile_features(${targetName} INTERFACE cxx_std_20)  # Special features
-set_target_options_warnings(${targetName})                   # Warning  Flags
-_set_target_options_compiler_def(${targetName})              # Compiler Flags
-_set_target_options_linker_def(${targetName})                # Linker   Flags
-set_target_options_macros_default(${targetName})             # Macro definitions
-
+target_link_libraries(${targetName} INTERFACE Config::Minimal) # Same base configuration as Config::Default
+target_compile_features(${targetName} INTERFACE cxx_std_20)    # Special features
+set_target_options_warnings(${targetName})                     # Warning  Flags
+_set_target_options_compiler_def(${targetName})                # Compiler Flags
+_set_target_options_linker_def(${targetName})                  # Linker   Flags
+set_target_options_macros(${targetName})                       # Macro definitions

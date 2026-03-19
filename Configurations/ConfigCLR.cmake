@@ -153,7 +153,7 @@ set_target_options_warnings(${targetName})                   # Warning  Flags
 _set_target_options_compiler_clr(${targetName})              # Compiler Flags
 _set_target_options_linker_clr(${targetName})                # Linker   Flags
 
-set_target_options_macros_default(${targetName})             # Macro definitions
+set_target_options_macros(${targetName})                     # Macro definitions
 set_target_options_macros_win(${targetName})                 # Windows dev macros
 
 _fix_runtime_library_for_clr(${targetName})                  # Replace /MT[d] with /MD[d]. /MT incompatible with /clr
