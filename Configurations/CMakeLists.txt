@@ -53,7 +53,5 @@ function(set_target_configuration targetName configName)
 		message(FATAL_ERROR "Configuration project does not exist: '${configName}'.")
 	endif()
 
-
-
 	target_link_libraries(${targetName} PRIVATE ${configName})
 endfunction()
