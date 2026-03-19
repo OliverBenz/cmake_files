@@ -22,7 +22,6 @@ if(NOT MSVC)
 endif()
 
 # ----- Helper function for configuration -----
-# TODO: MinSizeRel
 function(_set_target_options_compiler_clr targetName)
 	# ----- Setup variables -----
 	set(MSVC_ALL
@@ -53,6 +52,11 @@ function(_set_target_options_compiler_clr targetName)
 		${MSVC_RELEASE}
 		/Zi   # Produce a PDB that contains all the symbolic debugging information.
 	)
+	set(MSVC_RELEASE_MINSIZE
+		${MSVC_ALL}
+		/O1   # Optimization for size.             Auto-Sets:  /Gy
+		/Gy   # Enable Function-Level Linking.     Auto-Set by /O2
+	)
 
 	# ----- Option: Override Release config -----
 	if(RELEASE_EQUALS_RELWITHDEBINFO)
@@ -64,11 +68,13 @@ function(_set_target_options_compiler_clr targetName)
 	message(STATUS "- Compiler flags for Debug          ${MSVC_DEBUG}")
 	message(STATUS "- Compiler flags for Release        ${MSVC_RELEASE}")
 	message(STATUS "- Compiler flags for RelWithDebInfo ${MSVC_RELEASE_DEBINFO}")
+	message(STATUS "- Compiler flags for MinSizeRel     ${MSVC_RELEASE_MINSIZE}")
 
 	# ----- Add flags to target -----
 	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:Debug>:${MSVC_DEBUG}>")
 	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:Release>:${MSVC_RELEASE}>")
 	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:RelWithDebInfo>:${MSVC_RELEASE_DEBINFO}>")
+	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:MinSizeRel>:${MSVC_RELEASE_MINSIZE}>")
 endfunction()
 
 
@@ -91,7 +97,13 @@ function(_set_target_options_linker_clr targetName)
 		/DEBUG           # Create a debugging information file for the executable.
 		${MSVC_RELEASE}  # Ensure /OPT explicitly set. Default off due to /DEBUG.
 	)
-
+	set(MSVC_RELEASE_MINSIZE
+		/INCREMENTAL:NO # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
+		/OPT:REF        # Remove unreferenced functions.   Set by default unless /DEBUG is specified. Disables /INCREMENTAL
+		/OPT:ICF        # Enable identical COMDAT folding. Set by default unless /DEBUG is specified.
+		$<$<STREQUAL:${CMAKE_VS_PLATFORM_NAME},Win32>:/SAFESEH>  # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
+	)
+	
 	# ----- Option: Override Release config -----
 	if(RELEASE_EQUALS_RELWITHDEBINFO)
 		message(STATUS "- Note: Using the RelWithDebInfo linker configuration also for Release builds.")
@@ -102,11 +114,13 @@ function(_set_target_options_linker_clr targetName)
 	message(STATUS "- Linker flags for Debug          ${MSVC_DEBUG}")
 	message(STATUS "- Linker flags for Release        ${MSVC_RELEASE}")
 	message(STATUS "- Linker flags for RelWithDebInfo ${MSVC_RELEASE_DEBINFO}")
+	message(STATUS "- Linker flags for MinSizeRel     ${MSVC_RELEASE_MINSIZE}")
 
 	# ----- Add flags to target -----
 	target_link_options(${targetName} INTERFACE "$<$<CONFIG:Debug>:${MSVC_DEBUG}>")
 	target_link_options(${targetName} INTERFACE "$<$<CONFIG:Release>:${MSVC_RELEASE}>")
 	target_link_options(${targetName} INTERFACE "$<$<CONFIG:RelWithDebInfo>:${MSVC_RELEASE_DEBINFO}>")
+	target_link_options(${targetName} INTERFACE "$<$<CONFIG:MinSizeRel>:${MSVC_RELEASE_MINSIZE}>")
 endfunction()
 
 

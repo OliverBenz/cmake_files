@@ -31,6 +31,10 @@ function(_set_target_options_compiler_min targetName)
 		/O2         # Optimization for speed.            Auto-Sets:  /Gy
 		/Zi         # Produce a PDB that contains all the symbolic debugging information.
 	)
+	set(MSVC_RELEASE_MINSIZE
+		${MSVC_ALL}
+		/O1         # Optimization for size.            Auto-Sets:  /Gy
+	)
 
 	# GCC compiler flags
 	set(GCC_DEBUG
@@ -42,6 +46,10 @@ function(_set_target_options_compiler_min targetName)
 	)
 	set(GCC_RELEASE_DEBINFO
 		-O3  # Maximize optimization
+		-g   # Create debugging information
+	)
+	set(GCC_RELEASE_MINSIZE
+		-Os  # Optimization for size
 		-g   # Create debugging information
 	)
 
@@ -57,25 +65,31 @@ function(_set_target_options_compiler_min targetName)
 		-O3  # Maximize optimization
 		-g   # Create debugging information (May sometimes be weird because of optimization)
 	)
+	set(CLANG_RELEASE_MINSIZE
+		-Os  # Optimization for size
+	)
 
 	# ----- Switch which variables to use -----
 	# Use the correct set of options depending on the compiler
 	set(OPTIONS_DEBUG)
 	set(OPTIONS_RELEASE)
 	set(OPTIONS_RELEASE_DEBINFO)
-
+	set(OPTIONS_RELEASE_MINSIZE)
 	if(MSVC)                                         # MSVC
 		set(OPTIONS_DEBUG           ${MSVC_DEBUG})
 		set(OPTIONS_RELEASE         ${MSVC_RELEASE})
 		set(OPTIONS_RELEASE_DEBINFO ${MSVC_RELEASE_DEBINFO})
+		set(OPTIONS_RELEASE_MINSIZE ${MSVC_RELEASE_MINSIZE})
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")     # GCC
 		set(OPTIONS_DEBUG           ${GCC_DEBUG})
 		set(OPTIONS_RELEASE         ${GCC_RELEASE})
 		set(OPTIONS_RELEASE_DEBINFO ${GCC_RELEASE_DEBINFO})
+		set(OPTIONS_RELEASE_MINSIZE ${GCC_RELEASE_MINSIZE})
 	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")    # Clang / AppleClang
 		set(OPTIONS_DEBUG           ${CLANG_DEBUG})
 		set(OPTIONS_RELEASE         ${CLANG_RELEASE})
 		set(OPTIONS_RELEASE_DEBINFO ${CLANG_RELEASE_DEBINFO})
+		set(OPTIONS_RELEASE_MINSIZE ${CLANG_RELEASE_MINSIZE})
 	else()                                           # Else
 		message(AUTHOR_WARNING "No extra compiler flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
 		return()
@@ -91,11 +105,13 @@ function(_set_target_options_compiler_min targetName)
 	message(STATUS "- Compiler flags for Debug          ${OPTIONS_DEBUG}")
 	message(STATUS "- Compiler flags for Release        ${OPTIONS_RELEASE}")
 	message(STATUS "- Compiler flags for RelWithDebInfo ${OPTIONS_RELEASE_DEBINFO}")
+	message(STATUS "- Compiler flags for MinSizeRel     ${OPTIONS_RELEASE_MINSIZE}")
 
 	# ----- Add flags to target -----
 	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:Debug>:${OPTIONS_DEBUG}>")
 	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:Release>:${OPTIONS_RELEASE}>")
 	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:RelWithDebInfo>:${OPTIONS_RELEASE_DEBINFO}>")
+	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:MinSizeRel>:${OPTIONS_RELEASE_MINSIZE}>")
 endfunction()
 
 function(_set_target_options_linker_min targetName)
@@ -115,6 +131,7 @@ function(_set_target_options_linker_min targetName)
 		/DEBUG           # Create a debugging information file for the executable.
 		${MSVC_RELEASE}  # Ensure /OPT explicitly set. Default off due to /DEBUG.
 	)
+	set(MSVC_RELEASE_MINSIZE ${MSVC_RELEASE})
 
 	# GCC linker flags
 	set(GCC_ALL
@@ -128,30 +145,34 @@ function(_set_target_options_linker_min targetName)
 		${GCC_ALL}
 		-Wl,--gc-sections # Strip unused sections
 	)
-	set(GCC_RELEASE_DEBINFO
-		${GCC_RELEASE}
-	)
+	set(GCC_RELEASE_DEBINFO ${GCC_RELEASE})
+	set(GCC_RELEASE_MINSIZE ${GCC_RELEASE})
 
 	# Clang linker flags
 	set(CLANG_DEBUG           ${GCC_DEBUG})
 	set(CLANG_RELEASE         ${GCC_RELEASE})
-	set(CLANG_RELEASE_DEBINFO ${CLANG_RELEASE})
+	set(CLANG_RELEASE_DEBINFO ${GCC_RELEASE_DEBINFO})
+	set(CLANG_RELEASE_MINSIZE ${GCC_RELEASE_MINSIZE})
 
 	set(OPTIONS_DEBUG)
 	set(OPTIONS_RELEASE)
 	set(OPTIONS_RELEASE_DEBINFO)
+	set(OPTIONS_RELEASE_MINSIZE)
 	if(MSVC)                                         # MSVC
 		set(OPTIONS_DEBUG           ${MSVC_DEBUG})
 		set(OPTIONS_RELEASE         ${MSVC_RELEASE})
 		set(OPTIONS_RELEASE_DEBINFO ${MSVC_RELEASE_DEBINFO})
+		set(OPTIONS_RELEASE_MINSIZE ${MSVC_RELEASE_MINSIZE})
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")     # GCC
 		set(OPTIONS_DEBUG           ${GCC_DEBUG})
 		set(OPTIONS_RELEASE         ${GCC_RELEASE})
 		set(OPTIONS_RELEASE_DEBINFO ${GCC_RELEASE_DEBINFO})
+		set(OPTIONS_RELEASE_MINSIZE ${GCC_RELEASE_MINSIZE})
 	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")    # Clang / AppleClang
 		set(OPTIONS_DEBUG           ${CLANG_DEBUG})
 		set(OPTIONS_RELEASE         ${CLANG_RELEASE})
 		set(OPTIONS_RELEASE_DEBINFO ${CLANG_RELEASE_DEBINFO})
+		set(OPTIONS_RELEASE_MINSIZE ${CLANG_RELEASE_MINSIZE})
 	else()                                           # Else
 		message(AUTHOR_WARNING "No extra linker flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
 		return()
@@ -167,11 +188,13 @@ function(_set_target_options_linker_min targetName)
 	message(STATUS "- Linker flags for Debug          ${OPTIONS_DEBUG}")
 	message(STATUS "- Linker flags for Release        ${OPTIONS_RELEASE}")
 	message(STATUS "- Linker flags for RelWithDebInfo ${OPTIONS_RELEASE_DEBINFO}")
+	message(STATUS "- Linker flags for MinSizeRel     ${OPTIONS_RELEASE_MINSIZE}")
 
 	# ----- Add flags to target -----
 	target_link_options(${targetName} INTERFACE "$<$<CONFIG:Debug>:${OPTIONS_DEBUG}>")
 	target_link_options(${targetName} INTERFACE "$<$<CONFIG:Release>:${OPTIONS_RELEASE}>")
 	target_link_options(${targetName} INTERFACE "$<$<CONFIG:RelWithDebInfo>:${OPTIONS_RELEASE_DEBINFO}>")
+	target_link_options(${targetName} INTERFACE "$<$<CONFIG:MinSizeRel>:${OPTIONS_RELEASE_MINSIZE}>")
 endfunction()
 
 

@@ -39,6 +39,10 @@ function(_set_target_options_compiler_def targetName)
 	set(MSVC_RELEASE_DEBINFO
 		${MSVC_RELEASE}
 	)
+	set(MSVC_RELEASE_MINSIZE
+		${MSVC_ALL}
+		/Gy   # Enable Function-Level Linking.     Auto-Set by /O1
+	)
 
 	# ----- GCC compiler flags
 	set(GCC_ALL
@@ -65,6 +69,12 @@ function(_set_target_options_compiler_def targetName)
 		-ffunction-sections       # Equivalent to /Gy — one section per function
 		-fdata-sections           # Same for data
 	)
+	set(GCC_RELEASE_MINSIZE
+		${GCC_ALL}
+		-fomit-frame-pointer      # Allow omitting frame pointers — release only
+		-ffunction-sections       # Equivalent to /Gy — one section per function
+		-fdata-sections           # Same for data
+	)
 
 	# ----- Clang compiler flags
 	# TODO: All gcc options exist also for clang?
@@ -73,25 +83,29 @@ function(_set_target_options_compiler_def targetName)
 	set(CLANG_DEBUG           ${GCC_DEBUG})
 	set(CLANG_RELEASE         ${GCC_RELEASE})
 	set(CLANG_RELEASE_DEBINFO ${GCC_RELEASE_DEBINFO})
+	set(CLANG_RELEASE_MINSIZE ${GCC_RELEASE_MINSIZE})
 
 	# ----- Switch which variables to use -----
 	# Use the correct set of options depending on the compiler
 	set(OPTIONS_DEBUG)
 	set(OPTIONS_RELEASE)
 	set(OPTIONS_RELEASE_DEBINFO)
-
+	set(OPTIONS_RELEASE_MINSIZE)
 	if(MSVC)                                         # MSVC
 		set(OPTIONS_DEBUG           ${MSVC_DEBUG})
 		set(OPTIONS_RELEASE         ${MSVC_RELEASE})
 		set(OPTIONS_RELEASE_DEBINFO ${MSVC_RELEASE_DEBINFO})
+		set(OPTIONS_RELEASE_MINSIZE ${MSVC_RELEASE_MINSIZE})
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")     # GCC
 		set(OPTIONS_DEBUG           ${GCC_DEBUG})
 		set(OPTIONS_RELEASE         ${GCC_RELEASE})
 		set(OPTIONS_RELEASE_DEBINFO ${GCC_RELEASE_DEBINFO})
+		set(OPTIONS_RELEASE_MINSIZE ${GCC_RELEASE_MINSIZE})
 	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")    # Clang / AppleClang
 		set(OPTIONS_DEBUG           ${CLANG_DEBUG})
 		set(OPTIONS_RELEASE         ${CLANG_RELEASE})
 		set(OPTIONS_RELEASE_DEBINFO ${CLANG_RELEASE_DEBINFO})
+		set(OPTIONS_RELEASE_MINSIZE ${CLANG_RELEASE_MINSIZE})
 	else()                                           # Else
 		message(AUTHOR_WARNING "No extra compiler flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
 		return()
@@ -107,11 +121,13 @@ function(_set_target_options_compiler_def targetName)
 	message(STATUS "- Compiler flags for Debug          ${OPTIONS_DEBUG}")
 	message(STATUS "- Compiler flags for Release        ${OPTIONS_RELEASE}")
 	message(STATUS "- Compiler flags for RelWithDebInfo ${OPTIONS_RELEASE_DEBINFO}")
+	message(STATUS "- Compiler flags for MinSizeRel     ${OPTIONS_RELEASE_MINSIZE}")
 
 	# ----- Add flags to target -----
 	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:Debug>:${OPTIONS_DEBUG}>")
 	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:Release>:${OPTIONS_RELEASE}>")
 	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:RelWithDebInfo>:${OPTIONS_RELEASE_DEBINFO}>")
+	target_compile_options(${targetName} INTERFACE "$<$<CONFIG:MinSizeRel>:${OPTIONS_RELEASE_MINSIZE}>")
 endfunction()
 
 
@@ -130,12 +146,14 @@ function(_set_target_options_linker_def targetName)
 	set(MSVC_RELEASE_DEBINFO
 		${MSVC_RELEASE}  # /DEBUG inherited from Config::Minimal
 	)
+	set(MSVC_RELEASE_MINSIZE
+		/INCREMENTAL:NO                                          # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)	
+		$<$<STREQUAL:${CMAKE_VS_PLATFORM_NAME},Win32>:/SAFESEH>  # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
+	)
 
 	# GCC linker flags
 	set(GCC_ALL)
-	set(GCC_DEBUG
-		${GCC_ALL}
-	)
+	set(GCC_DEBUG ${GCC_ALL})
 	set(GCC_RELEASE
 		${GCC_ALL}
 		-Wl,--gc-sections                       # Remove unused sections — equivalent to /OPT:REF
@@ -145,27 +163,37 @@ function(_set_target_options_linker_def targetName)
 	set(GCC_RELEASE_DEBINFO
 		${GCC_RELEASE}
 	)
+	set(GCC_RELEASE_MINSIZE
+		${GCC_ALL}
+		-Wl,--gc-sections                       # Remove unused sections — equivalent to /OPT:REF
+		$<$<BOOL:${LLD_LINKER}>:-Wl,--icf=safe> # Enable Identical Code Folding. Equivalent to MSVC /OPT:ICF
+	)
 
 	# Clang linker flags
 	set(CLANG_DEBUG           ${GCC_DEBUG})
 	set(CLANG_RELEASE         ${GCC_RELEASE})
-	set(CLANG_RELEASE_DEBINFO ${CLANG_RELEASE})
+	set(CLANG_RELEASE_DEBINFO ${GCC_RELEASE_DEBINFO})
+	set(CLANG_RELEASE_MINSIZE ${GCC_RELEASE_MINSIZE})
 
 	set(OPTIONS_DEBUG)
 	set(OPTIONS_RELEASE)
 	set(OPTIONS_RELEASE_DEBINFO)
+	set(OPTIONS_RELEASE_MINSIZE)
 	if(MSVC)                                         # MSVC
 		set(OPTIONS_DEBUG           ${MSVC_DEBUG})
 		set(OPTIONS_RELEASE         ${MSVC_RELEASE})
 		set(OPTIONS_RELEASE_DEBINFO ${MSVC_RELEASE_DEBINFO})
+		set(OPTIONS_RELEASE_MINSIZE ${MSVC_RELEASE_MINSIZE})
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")     # GCC
 		set(OPTIONS_DEBUG           ${GCC_DEBUG})
 		set(OPTIONS_RELEASE         ${GCC_RELEASE})
 		set(OPTIONS_RELEASE_DEBINFO ${GCC_RELEASE_DEBINFO})
+		set(OPTIONS_RELEASE_MINSIZE ${GCC_RELEASE_MINSIZE})
 	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")    # Clang / AppleClang
 		set(OPTIONS_DEBUG           ${CLANG_DEBUG})
 		set(OPTIONS_RELEASE         ${CLANG_RELEASE})
 		set(OPTIONS_RELEASE_DEBINFO ${CLANG_RELEASE_DEBINFO})
+		set(OPTIONS_RELEASE_MINSIZE ${CLANG_RELEASE_MINSIZE})
 	else()                                           # Else
 		message(AUTHOR_WARNING "No extra linker flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
 		return()
@@ -181,11 +209,13 @@ function(_set_target_options_linker_def targetName)
 	message(STATUS "- Linker flags for Debug          ${OPTIONS_DEBUG}")
 	message(STATUS "- Linker flags for Release        ${OPTIONS_RELEASE}")
 	message(STATUS "- Linker flags for RelWithDebInfo ${OPTIONS_RELEASE_DEBINFO}")
+	message(STATUS "- Linker flags for MinSizeRel     ${OPTIONS_RELEASE_MINSIZE}")
 
 	# ----- Add flags to target -----
 	target_link_options(${targetName} INTERFACE "$<$<CONFIG:Debug>:${OPTIONS_DEBUG}>")
 	target_link_options(${targetName} INTERFACE "$<$<CONFIG:Release>:${OPTIONS_RELEASE}>")
 	target_link_options(${targetName} INTERFACE "$<$<CONFIG:RelWithDebInfo>:${OPTIONS_RELEASE_DEBINFO}>")
+	target_link_options(${targetName} INTERFACE "$<$<CONFIG:MinSizeRel>:${OPTIONS_RELEASE_MINSIZE}>")
 endfunction()
 
 
