@@ -16,6 +16,11 @@ include_guard(GLOBAL)
 
 include("${CMAKE_CURRENT_LIST_DIR}/GlobalDefaults.cmake")
 
+
+if(NOT MSVC)
+	return() # CLR Configuration only exists for MSVC
+endif()
+
 # ----- Helper function for configuration -----
 # TODO: MinSizeRel
 function(_set_target_options_compiler_clr targetName)
@@ -105,30 +110,17 @@ function(_set_target_options_linker_clr targetName)
 endfunction()
 
 
-# TODO: Test this guy
 function(fix_runtime_library_for_clr TARGET_NAME)
 	if(NOT MSVC)
 		message(AUTHOR_WARNING "MSVC only configuration!") #What are you even doing?
 		return()
 	endif()
 
-	# Note: Use COMPILE_OPTIONS instead of INTERFACE_COMPILE_OPTIONS because the function is applied on consumer (non-interface) targets.
-	# Scrub any /MT[d] that may have leaked in via COMPILE_OPTIONS
-	get_target_property(OPTS ${TARGET_NAME} COMPILE_OPTIONS)
-	if(OPTS AND NOT OPTS STREQUAL "OPTS-NOTFOUND")
-		list(FILTER OPTS EXCLUDE REGEX "/MT[d]?$")
-		set_target_properties(${TARGET_NAME} PROPERTIES COMPILE_OPTIONS "${OPTS}")
-	endif()
-
 	# Set the MSVC_RUNTIME_LIBRARY to /MD[d]
 	set_target_properties(${TARGET_NAME} PROPERTIES
-		MSVC_RUNTIME_LIBRARY "$<$<CONFIG:Debug>:/MDd>$<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:/MD>"
+		MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
 	)
 endfunction()
-
-if(NOT MSVC)
-	return() # CLR Configuration only exists for MSVC
-endif()
 
 
 message(STATUS "")

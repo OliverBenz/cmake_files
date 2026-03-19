@@ -41,12 +41,19 @@ function(set_target_configuration targetName configName)
 	if(NOT "${configName}" MATCHES "^Config::")
 		message(FATAL_ERROR "Invalid configuration: '${configName}'. Ensure prefix 'Config::'")
 	endif()
+
+	if("${configName}" MATCHES "^Config::Clr" AND NOT MSVC)
+		message(FATAL_ERROR "The configuration 'Config::Clr' is only available for MSVC.")
+	endif()
+
 	if(NOT TARGET ${configName})
 		if("${configName}" STREQUAL "Config::Empty")
 			return()  # No extra configuration
 		endif()
 		message(FATAL_ERROR "Configuration project does not exist: '${configName}'.")
 	endif()
+
+
 
 	target_link_libraries(${targetName} PRIVATE ${configName})
 endfunction()

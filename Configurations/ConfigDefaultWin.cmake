@@ -12,8 +12,8 @@ message(STATUS "")
 message(STATUS "----- Configuration Default Windows -----")
 message(STATUS "-----------------------------------------")
 message(STATUS "- Use ALIAS:             Config::DefaultWin")
-message(STATUS "- Use Compiler Flags:    Same as Default")
-message(STATUS "- Use Linker Flags:      Same as Default")
+message(STATUS "- Use Compiler Flags:    Same as Config::Default")
+message(STATUS "- Use Linker Flags:      Same as Config::Default")
 
 set(targetName "ConfigDefaultWin")
 

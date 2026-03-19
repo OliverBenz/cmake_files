@@ -8,10 +8,16 @@ include_guard(GLOBAL)
 include("${CMAKE_CURRENT_LIST_DIR}/ConfigClr.cmake")
 
 
+if(NOT MSVC)
+	return() # CLR Configuration only exists for MSVC
+endif()
+
 message(STATUS "")
 message(STATUS "----- Configuration CLR Win -----")
 message(STATUS "---------------------------------")
 message(STATUS "- Use ALIAS:             Config::ClrWin")
+message(STATUS "- Use Compiler Flags:    Same as Config::Clr")
+message(STATUS "- Use Linker Flags:      Same as Config::Clr")
 
 set(targetName "ConfigClrWin")
 
