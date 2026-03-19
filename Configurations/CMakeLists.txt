@@ -2,13 +2,23 @@ cmake_minimum_required(VERSION 3.27)
 
 include_guard(GLOBAL)
 
+# ----- Settings -----
+# Allow the option to override the Release build configuration with the RelWithDebInfo configuration.
+# Useful in environments where debug information is always desired on release builds or where build systems restrict you to default Release builds.
+option(RELEASE_EQUALS_RELWITHDEBINFO "Use the RelWithDebInfo configuration also for Release builds." OFF)
 
+
+# ----- Includes -----
 include("${CMAKE_CURRENT_LIST_DIR}/ConfigMinimal.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/ConfigDefault.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/ConfigDefaultWin.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/ConfigCLR.cmake")
 
 
+# ----- Interface -----
+# Set a configuration for a specific target.
+# Note: You can also just directly link to the configuration target. This function can be useful in patterns where e.g. a configuration choice is enforced.
+#
 # Configuration Names
 #  Empty:      No extra configuration.
 #  Minimal:    Clean minimal set of compiler and linker flags.

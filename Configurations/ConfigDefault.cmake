@@ -118,6 +118,11 @@ function(_set_target_options_compiler_def targetName)
 		message(AUTHOR_WARNING "No extra compiler flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
 	endif()
 
+	# ----- Option: Override Release config -----
+	if(RELEASE_EQUALS_RELWITHDEBINFO)
+		message(STATUS "- Note: Using the RelWithDebInfo compiler configuration also for Release builds.")
+		set(OPTIONS_RELEASE ${OPTIONS_RELEASE_DEBINFO})
+	endif()
 
 	# ----- Print which flags used -----
 	message(STATUS "- Compiler flags for Debug          ${OPTIONS_DEBUG}")
@@ -199,6 +204,12 @@ function(_set_target_options_linker_def targetName)
 		set(OPTIONS_RELEASE_DEBINFO ${CLANG_RELEASE_DEBINFO})
 	else()                                           # Else
 		message(AUTHOR_WARNING "No extra linker flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
+	endif()
+
+	# ----- Option: Override Release config -----
+	if(RELEASE_EQUALS_RELWITHDEBINFO)
+		message(STATUS "- Note: Using the RelWithDebInfo linker configuration also for Release builds.")
+		set(OPTIONS_RELEASE ${OPTIONS_RELEASE_DEBINFO})
 	endif()
 
 	# ----- Print which flags used -----

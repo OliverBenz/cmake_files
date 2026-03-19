@@ -47,6 +47,12 @@ function(_set_target_options_compiler_clr targetName)
 		/Zi   # Produce a PDB that contains all the symbolic debugging information.
 	)
 
+	# ----- Option: Override Release config -----
+	if(RELEASE_EQUALS_RELWITHDEBINFO)
+		message(STATUS "- Note: Using the RelWithDebInfo compiler configuration also for Release builds.")
+		set(MSVC_RELEASE ${MSVC_RELEASE_DEBINFO})
+	endif()
+
 	# ----- Print which flags used -----
 	message(STATUS "- Compiler flags for Debug          ${MSVC_DEBUG}")
 	message(STATUS "- Compiler flags for Release        ${MSVC_RELEASE}")
@@ -78,6 +84,12 @@ function(_set_target_options_linker_clr targetName)
 		/DEBUG           # Create a debugging information file for the executable.
 		${MSVC_RELEASE}  # Ensure /OPT explicitly set. Default off due to /DEBUG.
 	)
+
+	# ----- Option: Override Release config -----
+	if(RELEASE_EQUALS_RELWITHDEBINFO)
+		message(STATUS "- Note: Using the RelWithDebInfo linker configuration also for Release builds.")
+		set(MSVC_RELEASE ${MSVC_RELEASE_DEBINFO})
+	endif()
 
 	# ----- Print which flags used -----
 	message(STATUS "- Linker flags for Debug          ${MSVC_DEBUG}")
