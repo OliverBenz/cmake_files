@@ -22,7 +22,8 @@ option(RELEASE_EQUALS_RELWITHDEBINFO "Use the RelWithDebInfo configuration also 
 include("${CMAKE_CURRENT_LIST_DIR}/ConfigMinimal.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/ConfigDefault.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/ConfigDefaultWin.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/ConfigCLR.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/ConfigClr.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/ConfigClrWin.cmake")
 
 
 # ----- Interface -----
@@ -34,7 +35,8 @@ include("${CMAKE_CURRENT_LIST_DIR}/ConfigCLR.cmake")
 #  Minimal:    Clean minimal set of compiler and linker flags.
 #  Default:    Default configuration with detailed compiler and linker flag usage and common macros.
 #  DefaultWin: Default configuration with detailed compiler and linker flag usage and common macros. Defines further windows specific nice-to-have macros.
-#  CLR:        Common Language Runtime project (MSVC only). Call fix_runtime_library_for_clr after setting up your target.
+#  Clr:        Common Language Runtime project (MSVC only). Call fix_runtime_library_for_clr after setting up your target.
+#  ClrWin:     Common Language Runtime project (MSVC only). Defines further windows specific nice-to-have macros. Call fix_runtime_library_for_clr after setting up your target.
 function(set_target_configuration targetName configName)
 	if(NOT "${configName}" MATCHES "^Config::")
 		message(FATAL_ERROR "Invalid configuration: '${configName}'. Ensure prefix 'Config::'")

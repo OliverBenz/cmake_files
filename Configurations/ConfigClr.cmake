@@ -134,12 +134,12 @@ endif()
 message(STATUS "")
 message(STATUS "----- Configuration CLR -----")
 message(STATUS "-----------------------------")
-message(STATUS "- Use ALIAS:             Config::CLR")
+message(STATUS "- Use ALIAS:             Config::Clr")
 
-set(targetName "ConfigCLR")
+set(targetName "ConfigClr")
 
 add_library(${targetName} INTERFACE)
-add_library(Config::CLR ALIAS ${targetName})
+add_library(Config::Clr ALIAS ${targetName})
 
 target_compile_features(${targetName} INTERFACE cxx_std_20)  # Special features
 set_target_options_warnings(${targetName})                   # Warning  Flags
@@ -147,4 +147,3 @@ _set_target_options_compiler_clr(${targetName})              # Compiler Flags
 _set_target_options_linker_clr(${targetName})                # Linker   Flags
 
 set_target_options_macros(${targetName})                     # Macro definitions
-set_target_options_macros_win(${targetName})                 # Windows dev macros
