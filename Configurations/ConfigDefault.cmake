@@ -13,7 +13,6 @@ include("${CMAKE_CURRENT_LIST_DIR}/ConfigMinimal.cmake")
 
 # ----- Helper function for configuration -----
 # TODO: Test flags for gcc and clang
-# TODO: Test RelWithDebInfo for gcc and clang
 # TODO: MinSizeRel
 function(_set_target_options_compiler_def targetName)
 	# ----- Setup variables -----
@@ -60,8 +59,11 @@ function(_set_target_options_compiler_def targetName)
 		-fdata-sections           # Same for data
 	)
 	set(GCC_RELEASE_DEBINFO
-		${GCC_RELEASE}
-		-fno-omit-frame-pointer # Restore frame pointer for profiling
+		${GCC_ALL}
+		-fno-omit-frame-pointer   # Restore frame pointer for profiling
+		-flto                     # Link time optimization — equivalent to /GL + /LTCG
+		-ffunction-sections       # Equivalent to /Gy — one section per function
+		-fdata-sections           # Same for data
 	)
 
 	# ----- Clang compiler flags

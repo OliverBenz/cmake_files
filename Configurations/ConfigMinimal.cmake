@@ -126,7 +126,7 @@ function(_set_target_options_linker_min targetName)
 	)
 	set(GCC_RELEASE
 		${GCC_ALL}
-		-Wl,--gc-sections # Stip unused sections
+		-Wl,--gc-sections # Strip unused sections
 	)
 	set(GCC_RELEASE_DEBINFO
 		${GCC_RELEASE}
@@ -145,13 +145,13 @@ function(_set_target_options_linker_min targetName)
 		set(OPTIONS_RELEASE         ${MSVC_RELEASE})
 		set(OPTIONS_RELEASE_DEBINFO ${MSVC_RELEASE_DEBINFO})
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")     # GCC
-		set(OPTIONS_DEBUG   ${GCC_DEBUG})
-		set(OPTIONS_RELEASE ${GCC_RELEASE})
-		# TODO: DEBINFO
-	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")  # Clang / AppleClang
-		set(OPTIONS_DEBUG   ${CLANG_DEBUG})
-		set(OPTIONS_RELEASE ${CLANG_RELEASE})
-		# TODO: DEBINFO
+		set(OPTIONS_DEBUG           ${GCC_DEBUG})
+		set(OPTIONS_RELEASE         ${GCC_RELEASE})
+		set(OPTIONS_RELEASE_DEBINFO ${GCC_RELEASE_DEBINFO})
+	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")    # Clang / AppleClang
+		set(OPTIONS_DEBUG           ${CLANG_DEBUG})
+		set(OPTIONS_RELEASE         ${CLANG_RELEASE})
+		set(OPTIONS_RELEASE_DEBINFO ${CLANG_RELEASE_DEBINFO})
 	else()                                           # Else
 		message(AUTHOR_WARNING "No extra linker flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
 		return()

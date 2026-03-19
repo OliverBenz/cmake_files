@@ -107,32 +107,28 @@ endfunction()
 
 # TODO: Test this guy
 function(fix_runtime_library_for_clr TARGET_NAME)
-	if(NOT "${MSVC}")
+	if(NOT MSVC)
 		message(AUTHOR_WARNING "MSVC only configuration!") #What are you even doing?
 		return()
 	endif()
 
-	# Scrub any /MT[d] that may have leaked in via INTERFACE_COMPILE_OPTIONS
-	get_target_property(OPTS ${TARGET_NAME} INTERFACE_COMPILE_OPTIONS)
+	# Note: Use COMPILE_OPTIONS instead of INTERFACE_COMPILE_OPTIONS because the function is applied on consumer (non-interface) targets.
+	# Scrub any /MT[d] that may have leaked in via COMPILE_OPTIONS
+	get_target_property(OPTS ${TARGET_NAME} COMPILE_OPTIONS)
 	if(OPTS AND NOT OPTS STREQUAL "OPTS-NOTFOUND")
 		list(FILTER OPTS EXCLUDE REGEX "/MT[d]?$")
-		set_target_properties(${TARGET_NAME} PROPERTIES INTERFACE_COMPILE_OPTIONS "${OPTS}")
+		set_target_properties(${TARGET_NAME} PROPERTIES COMPILE_OPTIONS "${OPTS}")
 	endif()
 
-	# Scrub global flag bleed-in for this target specifically
-	target_compile_options(${TARGET_NAME} INTERFACE
-		$<$<CONFIG:Debug>:/MDd>
-		$<$<CONFIG:Release>:/MD>
-		$<$<CONFIG:RelWithDebInfo>:/MD>
-		$<$<CONFIG:MinSizeRel>:/MD>
+	# Set the MSVC_RUNTIME_LIBRARY to /MD[d]
+	set_target_properties(${TARGET_NAME} PROPERTIES
+		MSVC_RUNTIME_LIBRARY "$<$<CONFIG:Debug>:/MDd>$<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:/MD>"
 	)
 endfunction()
 
-if(NOT "${MSVC}")
+if(NOT MSVC)
 	return() # CLR Configuration only exists for MSVC
 endif()
-
-# TODO: Test whether target defines /MT[d] -> Remove and add /MD[d]
 
 
 message(STATUS "")

@@ -7,7 +7,7 @@ include_guard(GLOBAL)
 # -- We want to use LLD Linker on Mac/Linux if available
 find_program(LLD_LINKER lld)
 if(LLD_LINKER)
-    message(STATUS "lld found: ${LLD_LINKER} — enabling LLD linker and ICF")
+    message(STATUS "lld found: ${LLD_LINKER} - enabling LLD linker and ICF")
 else()
     message(STATUS "lld not found - using default linker, ICF disabled")
 endif()
