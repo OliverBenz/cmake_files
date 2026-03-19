@@ -147,7 +147,6 @@ set(targetName "ConfigClr")
 add_library(${targetName} INTERFACE)
 add_library(Config::Clr ALIAS ${targetName})
 
-target_compile_features(${targetName} INTERFACE cxx_std_20)  # Special features
 set_target_options_warnings(${targetName})                   # Warning  Flags
 _set_target_options_compiler_clr(${targetName})              # Compiler Flags
 _set_target_options_linker_clr(${targetName})                # Linker   Flags
