@@ -78,6 +78,7 @@ function(_set_target_options_compiler_clr targetName)
 endfunction()
 
 
+# Note: We use CMAKE_SIZEOF_VOID_P (void pointer size) to check for x86 vs x64 on a MSVC flag.
 function(_set_target_options_linker_clr targetName)
 	# ----- Setup variables -----
 	set(MSVC_DEBUG
@@ -101,7 +102,7 @@ function(_set_target_options_linker_clr targetName)
 		/INCREMENTAL:NO # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
 		/OPT:REF        # Remove unreferenced functions.   Set by default unless /DEBUG is specified. Disables /INCREMENTAL
 		/OPT:ICF        # Enable identical COMDAT folding. Set by default unless /DEBUG is specified.
-		$<$<STREQUAL:${CMAKE_VS_PLATFORM_NAME},Win32>:/SAFESEH>  # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
+		$<$<EQUAL:${CMAKE_SIZEOF_VOID_P},4>:/SAFESEH>  # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
 	)
 	
 	# ----- Option: Override Release config -----
@@ -147,7 +148,6 @@ set(targetName "ConfigClr")
 add_library(${targetName} INTERFACE)
 add_library(Config::Clr ALIAS ${targetName})
 
-target_compile_features(${targetName} INTERFACE cxx_std_20)  # Special features
 set_target_options_warnings(${targetName})                   # Warning  Flags
 _set_target_options_compiler_clr(${targetName})              # Compiler Flags
 _set_target_options_linker_clr(${targetName})                # Linker   Flags

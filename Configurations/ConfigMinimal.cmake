@@ -208,7 +208,6 @@ set(targetName "ConfigMinimal")
 add_library(${targetName} INTERFACE)
 add_library(Config::Minimal ALIAS ${targetName})
 
-target_compile_features(${targetName} INTERFACE cxx_std_20)  # Special features
 _set_target_options_compiler_min(${targetName})              # Compiler Flags
 _set_target_options_linker_min(${targetName})                # Linker   Flags
 set_target_options_macros(${targetName})                     # Macro definitions

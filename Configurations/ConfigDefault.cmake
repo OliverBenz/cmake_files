@@ -79,7 +79,6 @@ function(_set_target_options_compiler_def targetName)
 	# ----- Clang compiler flags
 	# TODO: All gcc options exist also for clang?
 	# TODO: CLANG_ALL for more flags
-	# TODO: CLANG_RELEASE_DEBINFO
 	set(CLANG_DEBUG           ${GCC_DEBUG})
 	set(CLANG_RELEASE         ${GCC_RELEASE})
 	set(CLANG_RELEASE_DEBINFO ${GCC_RELEASE_DEBINFO})
