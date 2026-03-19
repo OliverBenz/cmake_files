@@ -36,7 +36,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/ConfigCLR.cmake")
 #  DefaultWin: Default configuration with detailed compiler and linker flag usage and common macros. Defines further windows specific nice-to-have macros.
 #  CLR:        Common Language Runtime project (MSVC only).
 function(set_target_configuration targetName configName)
-	if(NOT "${configName}" MATCHES "Config::")
+	if(NOT "${configName}" MATCHES "^Config::")
 		message(FATAL_ERROR "Invalid configuration: '${configName}'. Ensure prefix 'Config::'")
 	endif()
 	if(NOT TARGET ${configName})

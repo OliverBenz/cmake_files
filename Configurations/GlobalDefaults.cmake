@@ -111,7 +111,7 @@ function(set_target_options_macros targetName)
 	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")    # Clang / AppleClang
 		set(OPTIONS   ${CLANG_MACROS})
 	else()                                           # Else
-		message(AUTHOR_WARNING "No extra linker flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
+		message(AUTHOR_WARNING "No extra macro definitions set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
 		return()
 	endif()
 

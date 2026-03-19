@@ -19,7 +19,6 @@ function(_set_target_options_compiler_def targetName)
 	# ----- Setup variables -----
 	# ----- MSVC compiler flags
 	set(MSVC_ALL
-		/W4            # Enable warning level 4.
 		/GS            # Buffer Security Check enabled.
 		/GR            # Adds code to check object types at run time. On by default.
 		/Gd            # Calling Convention. Explicitly use default (/Gd -> __cdecl).
@@ -120,21 +119,15 @@ function(_set_target_options_linker_def targetName)
 
 	# MSVC linker flags
 	set(MSVC_DEBUG
-		/DEBUG       # Create a debugging information file for the executable.
 		/INCREMENTAL # Link incrementally. Don't always perform a full link.
-		/OPT:NOREF   # Keep unreferenced functions.      Set by default when /DEBUG is specified.
-		/OPT:NOICF   # Disable identical COMDAT folding. Set by default when /DEBUG is specified.
 	)
 	set(MSVC_RELEASE
 		/LTCG           # Link-time code generation. For WholeProgramOptimization.
 		/INCREMENTAL:NO # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
-		/OPT:REF        # Remove unreferenced functions.   Set by default unless /DEBUG is specified. Disables /INCREMENTAL
-		/OPT:ICF        # Enable identical COMDAT folding. Set by default unless /DEBUG is specified.
 		$<$<STREQUAL:${CMAKE_VS_PLATFORM_NAME},Win32>:/SAFESEH>  # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
 	)
 	set(MSVC_RELEASE_DEBINFO
-		/DEBUG           # Create a debugging information file for the executable.
-		${MSVC_RELEASE}  # Ensure /OPT explicitly set. Default off due to /DEBUG.
+		${MSVC_RELEASE}  # /DEBUG inherited from Config::Minimal
 	)
 
 	# GCC linker flags
@@ -205,8 +198,6 @@ add_library(${targetName} INTERFACE)
 add_library(Config::Default ALIAS ${targetName})
 
 target_link_libraries(${targetName} INTERFACE Config::Minimal) # Same base configuration as Config::Default
-target_compile_features(${targetName} INTERFACE cxx_std_20)    # Special features
 set_target_options_warnings(${targetName})                     # Warning  Flags
 _set_target_options_compiler_def(${targetName})                # Compiler Flags
 _set_target_options_linker_def(${targetName})                  # Linker   Flags
-set_target_options_macros(${targetName})                       # Macro definitions

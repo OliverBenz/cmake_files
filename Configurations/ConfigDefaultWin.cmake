@@ -7,27 +7,6 @@ include_guard(GLOBAL)
 
 include("${CMAKE_CURRENT_LIST_DIR}/ConfigDefault.cmake")
 
-function(_set_target_options_macros_win targetName)
-	set(OPTIONS
-		"$<$<CONFIG:Debug>:_DEBUG>"
-		"$<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:NDEBUG>"
-		NOMINMAX                            # Disable min and max macros from the MFC STL.
-		WIN32_LEAN_AND_MEAN                 # Exclude rarely used includes from windows.h such as Cryptography, DDE, RPC, Shell, and Windows Sockets.
-		VC_EXTRALEAN                        # Exclude rarely used includes from MFC headers.
-		STRICT                              # Strict type checking in winapi. Helps us write more portable code.
-		STRICT_TYPED_ITEMIDS                # Strict type checking in shell headers. Helps us write more portable code.
-		_ATL_CSTRING_EXPLICIT_CONSTRUCTORS  # Makes certain CString constructors explicit.
-		_ATL_ALL_WARNINGS                   # Enables warnings that were disabled in old versions of ATL.
-		_AFX_ALL_WARNINGS                   # Enables all warnings hidden by MFC
-	)
-
-	# ----- Print which flags used -----
-	message(STATUS "- Use Macro Definitions: ${OPTIONS}")
-
-	# ----- Add flags to target -----
-	target_compile_definitions(${targetName} INTERFACE ${OPTIONS})
-endfunction()
-
 
 message(STATUS "")
 message(STATUS "----- Configuration Default Windows -----")
@@ -42,5 +21,5 @@ add_library(${targetName} INTERFACE)
 add_library(Config::DefaultWin ALIAS ${targetName})
 
 target_link_libraries(${targetName} INTERFACE Config::Default) # Same base configuration as Config::Default
-_set_target_options_macros_win(${targetName})                  # Macro definitions
+set_target_options_macros_win(${targetName})                   # Macro definitions
 

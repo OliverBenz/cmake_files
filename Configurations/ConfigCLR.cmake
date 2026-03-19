@@ -1,4 +1,5 @@
 # Description:
+#  - Does not extend the Minimal configuration as it's really a special case. Keeping separate.
 #  - Compiler/Linker: Parallel Build, Whole Program Optimization, Extra debug information and checks, explicitly set defaults.
 #    Adds /clr compilation for windows 
 #  - Macros:          Only _DEBUG and NDEBUG macros
@@ -20,8 +21,9 @@ include("${CMAKE_CURRENT_LIST_DIR}/GlobalDefaults.cmake")
 function(_set_target_options_compiler_clr targetName)
 	# ----- Setup variables -----
 	set(MSVC_ALL
-		/clr           # 
-		/W4            # Enable warning level 4.
+		# Common Language Runtime Compilation
+		/clr
+
 		/MP            # Enable multiprocessor compilation.
 		/FS            # Force synchronous .pdb file write. Required for /MP.
 		/GS            # Buffer Security Check enabled.
@@ -110,16 +112,11 @@ function(_fix_runtime_library_for_clr TARGET_NAME)
 		return()
 	endif()
 
-	# Force /MD (Release) and /MDd (Debug) — required for /clr
-	set_target_properties(${TARGET_NAME} PROPERTIES
-		MSVC_RUNTIME_LIBRARY "MultiThreadedDLL$<$<CONFIG:Debug>:Debug>"
-	)
-
-	# Scrub any /MT[d] that may have leaked in via COMPILE_OPTIONS
-	get_target_property(OPTS ${TARGET_NAME} COMPILE_OPTIONS)
+	# Scrub any /MT[d] that may have leaked in via INTERFACE_COMPILE_OPTIONS
+	get_target_property(OPTS ${TARGET_NAME} INTERFACE_COMPILE_OPTIONS)
 	if(OPTS AND NOT OPTS STREQUAL "OPTS-NOTFOUND")
 		list(FILTER OPTS EXCLUDE REGEX "/MT[d]?$")
-		set_target_properties(${TARGET_NAME} PROPERTIES COMPILE_OPTIONS "${OPTS}")
+		set_target_properties(${TARGET_NAME} PROPERTIES INTERFACE_COMPILE_OPTIONS "${OPTS}")
 	endif()
 
 	# Scrub global flag bleed-in for this target specifically
@@ -156,4 +153,6 @@ _set_target_options_linker_clr(${targetName})                # Linker   Flags
 set_target_options_macros(${targetName})                     # Macro definitions
 set_target_options_macros_win(${targetName})                 # Windows dev macros
 
-_fix_runtime_library_for_clr(${targetName})                  # Replace /MT[d] with /MD[d]. /MT incompatible with /clr
+# TODO: This should be called on the consumer target. Not here. 
+# The /MT,/MD flags are not set here and the cleanup needs to be done on the final targets.
+# _fix_runtime_library_for_clr(${targetName})                  # Replace /MT[d] with /MD[d]. /MT incompatible with /clr
