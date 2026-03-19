@@ -7,7 +7,7 @@
 # Compatibility notes:
 #  - MSVC  only
 #  - /ZI   not compatible with /clr. Using /Zi
-#  - /MT   not compatible with /clr. Ensure /MD[d]  See: _fix_runtime_library_for_clr
+#  - /MT   not compatible with /clr. Ensure /MD[d]  See: fix_runtime_library_for_clr
 #  - /EHsc not compatible with /clr. Use /EHa
 cmake_minimum_required(VERSION 3.27)
 
@@ -106,7 +106,7 @@ endfunction()
 
 
 # TODO: Test this guy
-function(_fix_runtime_library_for_clr TARGET_NAME)
+function(fix_runtime_library_for_clr TARGET_NAME)
 	if(NOT "${MSVC}")
 		message(AUTHOR_WARNING "MSVC only configuration!") #What are you even doing?
 		return()
@@ -152,7 +152,3 @@ _set_target_options_linker_clr(${targetName})                # Linker   Flags
 
 set_target_options_macros(${targetName})                     # Macro definitions
 set_target_options_macros_win(${targetName})                 # Windows dev macros
-
-# TODO: This should be called on the consumer target. Not here. 
-# The /MT,/MD flags are not set here and the cleanup needs to be done on the final targets.
-# _fix_runtime_library_for_clr(${targetName})                  # Replace /MT[d] with /MD[d]. /MT incompatible with /clr

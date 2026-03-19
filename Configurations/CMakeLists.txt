@@ -9,7 +9,7 @@ find_program(LLD_LINKER lld)
 if(LLD_LINKER)
     message(STATUS "lld found: ${LLD_LINKER} — enabling LLD linker and ICF")
 else()
-    message(STATUS "lld not found — using default linker, ICF disabled")
+    message(STATUS "lld not found - using default linker, ICF disabled")
 endif()
 
 
@@ -34,7 +34,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/ConfigCLR.cmake")
 #  Minimal:    Clean minimal set of compiler and linker flags.
 #  Default:    Default configuration with detailed compiler and linker flag usage and common macros.
 #  DefaultWin: Default configuration with detailed compiler and linker flag usage and common macros. Defines further windows specific nice-to-have macros.
-#  CLR:        Common Language Runtime project (MSVC only).
+#  CLR:        Common Language Runtime project (MSVC only). Call fix_runtime_library_for_clr after setting up your target.
 function(set_target_configuration targetName configName)
 	if(NOT "${configName}" MATCHES "^Config::")
 		message(FATAL_ERROR "Invalid configuration: '${configName}'. Ensure prefix 'Config::'")

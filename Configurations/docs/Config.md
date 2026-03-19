@@ -8,5 +8,5 @@ Target Name        | Description
 Config::Default    | Default. Strong optimization and extra debug information set up.
 Config::DefaultWin | Default for Windows projects. Same as Config::Default with nice-to-have WINDOWS/MFC/ATL macros defined.
 Config::Minimal    | Only parallel build, optimization, and debug information settings.
-Config::CLR        | Common Language Runtime enabled. Default configuration with flags adapted to be /clr compatible (MSVC only).
+Config::CLR        | Common Language Runtime enabled. Default configuration with flags adapted to be /clr compatible (MSVC only). Call fix_runtime_library_for_clr.
 
