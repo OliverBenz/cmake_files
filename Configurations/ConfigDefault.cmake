@@ -138,16 +138,16 @@ function(_set_target_options_linker_def targetName)
 		/INCREMENTAL # Link incrementally. Don't always perform a full link.
 	)
 	set(MSVC_RELEASE
-		/LTCG                                                    # Link-time code generation. For WholeProgramOptimization.
-		/INCREMENTAL:NO                                          # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
-		$<$<STREQUAL:${CMAKE_VS_PLATFORM_NAME},Win32>:/SAFESEH>  # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
+		/LTCG                                          # Link-time code generation. For WholeProgramOptimization.
+		/INCREMENTAL:NO                                # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
+		$<$<EQUAL:${CMAKE_SIZEOF_VOID_P},4>:/SAFESEH>  # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
 	)
 	set(MSVC_RELEASE_DEBINFO
 		${MSVC_RELEASE}  # /DEBUG inherited from Config::Minimal
 	)
 	set(MSVC_RELEASE_MINSIZE
-		/INCREMENTAL:NO                                          # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)	
-		$<$<STREQUAL:${CMAKE_VS_PLATFORM_NAME},Win32>:/SAFESEH>  # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
+		/INCREMENTAL:NO                               # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)	
+		$<$<EQUAL:${CMAKE_SIZEOF_VOID_P},4>:/SAFESEH> # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
 	)
 
 	# GCC linker flags
