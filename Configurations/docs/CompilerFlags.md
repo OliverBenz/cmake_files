@@ -1,5 +1,4 @@
 # Compiler and Linker Flags
-This page summarizes the findings of the investigation task for the MSVC compiler and linker flags.
 The list below shows the flags investigated so far. More could be added.
 
 ## General Description
