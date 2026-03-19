@@ -88,20 +88,20 @@ function(_set_target_options_linker_clr targetName)
 		/OPT:NOICF   # Disable identical COMDAT folding. Set by default when /DEBUG is specified.
 	)
 	set(MSVC_RELEASE
-		/LTCG           # Link-time code generation. For WholeProgramOptimization.
-		/INCREMENTAL:NO # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
-		/OPT:REF        # Remove unreferenced functions.   Set by default unless /DEBUG is specified. Disables /INCREMENTAL
-		/OPT:ICF        # Enable identical COMDAT folding. Set by default unless /DEBUG is specified.
-		$<$<STREQUAL:${CMAKE_VS_PLATFORM_NAME},Win32>:/SAFESEH>  # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
+		/LTCG                                          # Link-time code generation. For WholeProgramOptimization.
+		/INCREMENTAL:NO                                # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
+		/OPT:REF                                       # Remove unreferenced functions.   Set by default unless /DEBUG is specified. Disables /INCREMENTAL
+		/OPT:ICF                                       # Enable identical COMDAT folding. Set by default unless /DEBUG is specified.
+		$<$<EQUAL:${CMAKE_SIZEOF_VOID_P},4>:/SAFESEH>  # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
 	)
 	set(MSVC_RELEASE_DEBINFO
 		/DEBUG           # Create a debugging information file for the executable.
 		${MSVC_RELEASE}  # Ensure /OPT explicitly set. Default off due to /DEBUG.
 	)
 	set(MSVC_RELEASE_MINSIZE
-		/INCREMENTAL:NO # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
-		/OPT:REF        # Remove unreferenced functions.   Set by default unless /DEBUG is specified. Disables /INCREMENTAL
-		/OPT:ICF        # Enable identical COMDAT folding. Set by default unless /DEBUG is specified.
+		/INCREMENTAL:NO                                # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
+		/OPT:REF                                       # Remove unreferenced functions.   Set by default unless /DEBUG is specified. Disables /INCREMENTAL
+		/OPT:ICF                                       # Enable identical COMDAT folding. Set by default unless /DEBUG is specified.
 		$<$<EQUAL:${CMAKE_SIZEOF_VOID_P},4>:/SAFESEH>  # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
 	)
 	
