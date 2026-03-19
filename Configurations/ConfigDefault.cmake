@@ -17,8 +17,8 @@ endif()
 include("${CMAKE_CURRENT_LIST_DIR}/GlobalDefaults.cmake")
 
 # ----- Helper function for configuration -----
-# TODO: Move flags for gcc and clang
-# TODO: RelWithDebInfo for gcc and clang
+# TODO: Test flags for gcc and clang
+# TODO: Test RelWithDebInfo for gcc and clang
 # TODO: MinSizeRel
 function(_set_target_options_compiler_def targetName)
 	# ----- Setup variables -----
@@ -116,6 +116,7 @@ function(_set_target_options_compiler_def targetName)
 		set(OPTIONS_RELEASE_DEBINFO ${CLANG_RELEASE_DEBINFO})
 	else()                                           # Else
 		message(AUTHOR_WARNING "No extra compiler flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
+		return()
 	endif()
 
 	# ----- Option: Override Release config -----
@@ -204,6 +205,7 @@ function(_set_target_options_linker_def targetName)
 		set(OPTIONS_RELEASE_DEBINFO ${CLANG_RELEASE_DEBINFO})
 	else()                                           # Else
 		message(AUTHOR_WARNING "No extra linker flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
+		return()
 	endif()
 
 	# ----- Option: Override Release config -----

@@ -78,6 +78,7 @@ function(_set_target_options_compiler_min targetName)
 		set(OPTIONS_RELEASE_DEBINFO ${CLANG_RELEASE_DEBINFO})
 	else()                                           # Else
 		message(AUTHOR_WARNING "No extra compiler flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
+		return()
 	endif()
 
 	# ----- Option: Override Release config -----
@@ -139,6 +140,7 @@ function(_set_target_options_linker_min targetName)
 		# TODO: DEBINFO
 	else()                                           # Else
 		message(AUTHOR_WARNING "No extra linker flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
+		return()
 	endif()
 
 	# ----- Option: Override Release config -----

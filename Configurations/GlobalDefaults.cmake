@@ -60,7 +60,7 @@ function(set_target_options_warnings targetName)
 		-Wuseless-cast           # Warn if you perform a cast to the same type
 	)
 
-	set(targetWarnings)
+	unset(targetWarnings)
 	if(MSVC)
 		set(targetWarnings ${MSVC_WARNINGS})
 	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -69,6 +69,7 @@ function(set_target_options_warnings targetName)
 		set(targetWarnings ${GCC_WARNINGS})
 	else()
 		message(AUTHOR_WARNING "No compiler warnings set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
+		return()
 	endif()
 
 	# ----- Print which flags used -----
@@ -96,15 +97,16 @@ function(set_target_options_macros_default targetName)
 		"$<$<AND:$<CONFIG:Debug>,$<PLATFORM_ID:Linux>>:_GLIBCXX_DEBUG>"    # Linux Clang uses libstdc++
 	)
 
-	set(OPTIONS)
+	unset(OPTIONS)
 	if(MSVC)                                         # MSVC
 		set(OPTIONS ${MSVC_MACROS})
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")     # GCC
 		set(OPTIONS   ${GCC_MACROS})
-	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")  # Clang / AppleClang
+	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")    # Clang / AppleClang
 		set(OPTIONS   ${CLANG_MACROS})
 	else()                                           # Else
 		message(AUTHOR_WARNING "No extra linker flags set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
+		return()
 	endif()
 
 	# ----- Print which flags used -----
