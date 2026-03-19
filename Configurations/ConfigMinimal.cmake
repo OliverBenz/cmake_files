@@ -122,10 +122,11 @@ function(_set_target_options_linker_min targetName)
 	)
 	set(GCC_DEBUG
 		${GCC_ALL}
-		-Wl,--no-gc-sections # Keep all sections — opposite of release, don't strip anything
+		-Wl,--no-gc-sections # Keep all sections - opposite of release, don't strip anything
 	)
 	set(GCC_RELEASE
 		${GCC_ALL}
+		-Wl,--gc-sections # Stip unused sections
 	)
 	set(GCC_RELEASE_DEBINFO
 		${GCC_RELEASE}

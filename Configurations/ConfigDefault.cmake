@@ -45,7 +45,6 @@ function(_set_target_options_compiler_def targetName)
 	set(GCC_ALL
 		-fexceptions              # Exception handling — equivalent to /EHsc
 		-fstack-protector-strong  # Buffer security check — equivalent to /GS
-		-fPIC                     # Position independent code — good default for libraries
 		-pipe                     # Use pipes instead of temp files — speeds up compilation like /MP
 	)
 	set(GCC_DEBUG
@@ -122,8 +121,8 @@ function(_set_target_options_linker_def targetName)
 		/INCREMENTAL # Link incrementally. Don't always perform a full link.
 	)
 	set(MSVC_RELEASE
-		/LTCG           # Link-time code generation. For WholeProgramOptimization.
-		/INCREMENTAL:NO # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
+		/LTCG                                                    # Link-time code generation. For WholeProgramOptimization.
+		/INCREMENTAL:NO                                          # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
 		$<$<STREQUAL:${CMAKE_VS_PLATFORM_NAME},Win32>:/SAFESEH>  # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
 	)
 	set(MSVC_RELEASE_DEBINFO
@@ -137,8 +136,9 @@ function(_set_target_options_linker_def targetName)
 	)
 	set(GCC_RELEASE
 		${GCC_ALL}
-		-Wl,--gc-sections # Remove unused sections — equivalent to /OPT:REF
-		$<$<BOOL:${LLD_LINKER}>:-Wl,--icf=all>
+		-Wl,--gc-sections                       # Remove unused sections — equivalent to /OPT:REF
+		-flto                                   # Link time optimization — pairs with -flto in compiler flags
+		$<$<BOOL:${LLD_LINKER}>:-Wl,--icf=safe> # Enable Identical Code Folding. Equivalent to MSVC /OPT:ICF
 	)
 	set(GCC_RELEASE_DEBINFO
 		${GCC_RELEASE}
