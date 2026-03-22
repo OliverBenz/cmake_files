@@ -80,6 +80,16 @@ endfunction()
 
 # Note: We use CMAKE_SIZEOF_VOID_P (void pointer size) to check for x86 vs x64 on a MSVC flag.
 function(_set_target_options_linker_clr targetName)
+	# ----- Environment Checks -----
+	set(SAFESEH_SUPPORTED FALSE) # is only supported on MSVC ABI x86 (Win32) targets.
+	# Windows with MSVC ABI
+	if(MSVC AND (
+		(DEFINED CMAKE_CXX_COMPILER_ARCHITECTURE_ID AND CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "X86") OR
+		(DEFINED CMAKE_C_COMPILER_ARCHITECTURE_ID   AND CMAKE_C_COMPILER_ARCHITECTURE_ID   STREQUAL "X86")
+	))
+		set(SAFESEH_SUPPORTED TRUE)
+	endif()
+
 	# ----- Setup variables -----
 	set(MSVC_DEBUG
 		/DEBUG       # Create a debugging information file for the executable.
@@ -88,21 +98,21 @@ function(_set_target_options_linker_clr targetName)
 		/OPT:NOICF   # Disable identical COMDAT folding. Set by default when /DEBUG is specified.
 	)
 	set(MSVC_RELEASE
-		/LTCG                                          # Link-time code generation. For WholeProgramOptimization.
-		/INCREMENTAL:NO                                # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
-		/OPT:REF                                       # Remove unreferenced functions.   Set by default unless /DEBUG is specified. Disables /INCREMENTAL
-		/OPT:ICF                                       # Enable identical COMDAT folding. Set by default unless /DEBUG is specified.
-		$<$<EQUAL:${CMAKE_SIZEOF_VOID_P},4>:/SAFESEH>  # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
+		/LTCG                                    # Link-time code generation. For WholeProgramOptimization.
+		/INCREMENTAL:NO                          # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
+		/OPT:REF                                 # Remove unreferenced functions.   Set by default unless /DEBUG is specified. Disables /INCREMENTAL
+		/OPT:ICF                                 # Enable identical COMDAT folding. Set by default unless /DEBUG is specified.
+		$<$<BOOL:${SAFESEH_SUPPORTED}>:/SAFESEH> # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
 	)
 	set(MSVC_RELEASE_DEBINFO
 		/DEBUG           # Create a debugging information file for the executable.
 		${MSVC_RELEASE}  # Ensure /OPT explicitly set. Default off due to /DEBUG.
 	)
 	set(MSVC_RELEASE_MINSIZE
-		/INCREMENTAL:NO                                # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
-		/OPT:REF                                       # Remove unreferenced functions.   Set by default unless /DEBUG is specified. Disables /INCREMENTAL
-		/OPT:ICF                                       # Enable identical COMDAT folding. Set by default unless /DEBUG is specified.
-		$<$<EQUAL:${CMAKE_SIZEOF_VOID_P},4>:/SAFESEH>  # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
+		/INCREMENTAL:NO                          # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
+		/OPT:REF                                 # Remove unreferenced functions.   Set by default unless /DEBUG is specified. Disables /INCREMENTAL
+		/OPT:ICF                                 # Enable identical COMDAT folding. Set by default unless /DEBUG is specified.
+		$<$<BOOL:${SAFESEH_SUPPORTED}>:/SAFESEH> # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
 	)
 	
 	# ----- Option: Override Release config -----

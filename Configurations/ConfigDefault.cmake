@@ -12,8 +12,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/ConfigMinimal.cmake")
 
 
 # ----- Helper function for configuration -----
-# TODO: Test flags for gcc and clang
-# TODO: MinSizeRel
+# TODO: Test flags for clang
 function(_set_target_options_compiler_def targetName)
 	# ----- Setup variables -----
 	# ----- MSVC compiler flags
@@ -131,23 +130,32 @@ endfunction()
 
 
 function(_set_target_options_linker_def targetName)
-	# ----- Setup variables -----
+	# ----- Environment Checks -----
+	set(SAFESEH_SUPPORTED FALSE) # is only supported on MSVC ABI x86 (Win32) targets.
+	# Windows with MSVC ABI
+	if(MSVC AND (
+		(DEFINED CMAKE_CXX_COMPILER_ARCHITECTURE_ID AND CMAKE_CXX_COMPILER_ARCHITECTURE_ID STREQUAL "X86") OR
+		(DEFINED CMAKE_C_COMPILER_ARCHITECTURE_ID   AND CMAKE_C_COMPILER_ARCHITECTURE_ID   STREQUAL "X86")
+	))
+		set(SAFESEH_SUPPORTED TRUE)
+	endif()
 
+	# ----- Setup variables -----
 	# MSVC linker flags
 	set(MSVC_DEBUG
 		/INCREMENTAL # Link incrementally. Don't always perform a full link.
 	)
 	set(MSVC_RELEASE
-		/LTCG                                          # Link-time code generation. For WholeProgramOptimization.
-		/INCREMENTAL:NO                                # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
-		$<$<EQUAL:${CMAKE_SIZEOF_VOID_P},4>:/SAFESEH>  # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
+		/LTCG                                    # Link-time code generation. For WholeProgramOptimization.
+		/INCREMENTAL:NO                          # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
+		$<$<BOOL:${SAFESEH_SUPPORTED}>:/SAFESEH> # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
 	)
 	set(MSVC_RELEASE_DEBINFO
 		${MSVC_RELEASE}  # /DEBUG inherited from Config::Minimal
 	)
 	set(MSVC_RELEASE_MINSIZE
-		/INCREMENTAL:NO                               # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)	
-		$<$<EQUAL:${CMAKE_SIZEOF_VOID_P},4>:/SAFESEH> # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
+		/INCREMENTAL:NO                          # Always perform a full link. /INCREMENTAL not compatible with /LTCG (in WholeProgramOptimization)
+		$<$<BOOL:${SAFESEH_SUPPORTED}>:/SAFESEH> # Only produces an image if we can produce a table of the image's safe exception handlers. Only valid for x86 targets.
 	)
 
 	# GCC linker flags

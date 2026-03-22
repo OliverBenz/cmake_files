@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.27)
 
 include_guard(GLOBAL)
 
-
 # Use this function only on the predefined interface libraries.
 function(set_target_options_warnings targetName)
 	set(MSVC_WARNINGS
@@ -95,12 +94,12 @@ function(set_target_options_macros targetName)
 	)
 	set(GCC_MACROS
 		${DEFAULTS}
-		"$<$<CONFIG:Debug>:_GLIBCXX_DEBUG>" # Enable STL debug checks — similar to /RTC1 spirit
+		"$<$<CONFIG:Debug>:_GLIBCXX_ASSERTIONS>" # Enable ABI-safe libstdc++ assertions for debug builds
 	)
 	set(CLANG_MACROS
 		${DEFAULTS}
-		"$<$<AND:$<CONFIG:Debug>,$<PLATFORM_ID:Darwin>>:_LIBCPP_DEBUG=1>"  # macOS Clang uses libc++
-		"$<$<AND:$<CONFIG:Debug>,$<PLATFORM_ID:Linux>>:_GLIBCXX_DEBUG>"    # Linux Clang uses libstdc++
+		"$<$<AND:$<CONFIG:Debug>,$<PLATFORM_ID:Darwin>>:_LIBCPP_DEBUG=1>"    # macOS Clang uses libc++
+		"$<$<AND:$<CONFIG:Debug>,$<PLATFORM_ID:Linux>>:_GLIBCXX_ASSERTIONS>" # Linux Clang usually uses libstdc++
 	)
 
 	unset(OPTIONS)
@@ -108,8 +107,10 @@ function(set_target_options_macros targetName)
 		set(OPTIONS ${MSVC_MACROS})
 	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")     # GCC
 		set(OPTIONS   ${GCC_MACROS})
+		message(STATUS "- GNU libstdc++ ABI-safe assertions enabled in Debug builds (_GLIBCXX_ASSERTIONS).")
 	elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")    # Clang / AppleClang
 		set(OPTIONS   ${CLANG_MACROS})
+		message(STATUS "- GNU libstdc++ ABI-safe assertions enabled in Debug builds (_GLIBCXX_ASSERTIONS).")
 	else()                                           # Else
 		message(AUTHOR_WARNING "No extra macro definitions set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
 		return()
