@@ -14,8 +14,9 @@ function(_set_target_options_compiler_min targetName)
 	# ----- Setup variables -----
 	# MSVC compiler flags
 	set(MSVC_ALL
-		/MP         # Enable multiprocessor compilation.
-		/FS         # Force synchronous .pdb file write. Required for /MP.
+		/MP             # Enable multiprocessor compilation.
+		/FS             # Force synchronous .pdb file write. Required for /MP.
+		/Zc:__cplusplus # Enable updated __cplusplus macro.
 	)
 	set(MSVC_DEBUG
 		${MSVC_ALL}
