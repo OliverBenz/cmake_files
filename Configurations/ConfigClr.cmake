@@ -28,14 +28,15 @@ function(_set_target_options_compiler_clr targetName)
 		# Common Language Runtime Compilation
 		/clr
 
-		/MP            # Enable multiprocessor compilation.
-		/FS            # Force synchronous .pdb file write. Required for /MP.
-		/GS            # Buffer Security Check enabled.
-		/GR            # Adds code to check object types at run time. On by default.
-		/Gd            # Calling Convention. Explicitly use default (/Gd -> __cdecl).
-		/EHa           # Exception handling model. 'a' .. Catches both structured and standard C++ exceptions.
-		/fp:precise    # Floating-point behavior precise. Explicitly use default: precise.
-		/permissive-   # Enforce ISO C++ standard compliance.
+		/MP             # Enable multiprocessor compilation.
+		/FS             # Force synchronous .pdb file write. Required for /MP.
+		/GS             # Buffer Security Check enabled.
+		/GR             # Adds code to check object types at run time. On by default.
+		/Gd             # Calling Convention. Explicitly use default (/Gd -> __cdecl).
+		/EHa            # Exception handling model. 'a' .. Catches both structured and standard C++ exceptions.
+		/fp:precise     # Floating-point behavior precise. Explicitly use default: precise.
+		/permissive-    # Enforce ISO C++ standard compliance.
+		/Zc:__cplusplus # Enable updated __cplusplus macro.
 	)
 	set(MSVC_DEBUG
 		${MSVC_ALL}
