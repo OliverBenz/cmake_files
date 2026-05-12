@@ -27,8 +27,10 @@ include("${CMAKE_CURRENT_LIST_DIR}/ConfigClrWin.cmake")
 
 
 # ----- Interface -----
-# Set a configuration for a specific target.
-# Note: You can also just directly link to the configuration target. This function can be useful in patterns where e.g. a configuration choice is enforced.
+# Set a configuration and optionally the character set for a specific target.
+#
+# Parsed Arguments: 
+#   TARGET_CHARSET:  Optional for Windows: ["Unicode", "MBCS", "SBCS"]. Default if not specified: "Unicode"
 #
 # Configuration Names
 #  Empty:      No extra configuration.
@@ -37,7 +39,13 @@ include("${CMAKE_CURRENT_LIST_DIR}/ConfigClrWin.cmake")
 #  DefaultWin: Default configuration with detailed compiler and linker flag usage and common macros. Defines further windows specific nice-to-have macros.
 #  Clr:        Common Language Runtime project (MSVC only). Call fix_runtime_library_for_clr after setting up your target.
 #  ClrWin:     Common Language Runtime project (MSVC only). Defines further windows specific nice-to-have macros. Call fix_runtime_library_for_clr after setting up your target.
+#
+# Note: You can also just directly link to the configuration target. This function can be useful in patterns where e.g. a configuration choice is enforced.
 function(set_target_configuration targetName configName)
+	# Parse optional function arguments 
+	cmake_parse_arguments(ARG "" "TARGET_CHARSET" "" ${ARGN})
+
+	# Handle Configurations
 	if(NOT "${configName}" MATCHES "^Config::")
 		message(FATAL_ERROR "Invalid configuration: '${configName}'. Ensure prefix 'Config::'")
 	endif()
@@ -52,6 +60,21 @@ function(set_target_configuration targetName configName)
 		endif()
 		message(FATAL_ERROR "Configuration project does not exist: '${configName}'.")
 	endif()
-
 	target_link_libraries(${targetName} PRIVATE ${configName})
+
+	# Handle Character Set (Unicode, MBCS, SBCS)
+	if(WIN32)
+		set(charsetMacros)
+		if("${ARG_TARGET_CHARSET}" STREQUAL "Unicode" OR "${ARG_TARGET_CHARSET}" STREQUAL "")
+			set(charsetMacros _UNICODE UNICODE)
+		elseif("${ARG_TARGET_CHARSET}" STREQUAL "MBCS")
+			set(charsetMacros _MBCS)
+		elseif("${ARG_TARGET_CHARSET}" STREQUAL "SBCS")
+			set(charsetMacros _SBCS)
+		else()
+			message(FATAL_ERROR "Invalid character set configuration specified '${ARG_TARGET_CHARSET}'. Use: ['Unicode', 'MBCS', 'SBCS'].")
+		endif()
+
+		target_compile_definitions(${targetName} PRIVATE ${charsetMacros})
+	endif()
 endfunction()
