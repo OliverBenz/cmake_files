@@ -28,6 +28,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/ConfigClrWin.cmake")
 
 # ----- Interface -----
 # Set a configuration and optionally the character set for a specific target.
+# Also hide symbols in shared libraries by default. Export manually with generate_export_header pattern.
 #
 # Parsed Arguments: 
 #   TARGET_CHARSET:  Optional for Windows: ["Unicode", "MBCS", "SBCS"]. Default if not specified: "Unicode"
@@ -77,4 +78,10 @@ function(set_target_configuration targetName configName)
 
 		target_compile_definitions(${targetName} PRIVATE ${charsetMacros})
 	endif()
+
+	# Hide symbols in shared libraries by default.
+	set_target_properties(${targetName} PROPERTIES
+		CXX_VISIBILITY_PRESET     hidden
+		VISIBILITY_INLINES_HIDDEN YES
+	)
 endfunction()
