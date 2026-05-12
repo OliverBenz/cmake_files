@@ -1,7 +1,5 @@
 # Description:
 #  - Default Configuration + WINDOWS/MFC/ATL macros defined.
-cmake_minimum_required(VERSION 3.27)
-
 include_guard(GLOBAL)
 
 

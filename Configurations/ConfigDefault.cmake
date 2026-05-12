@@ -3,8 +3,6 @@
 #  - Compiler/Linker: Parallel Build, Whole Program Optimization, Extra debug information and checks, explicitly set defaults.
 #  - Macros:          Only _DEBUG and NDEBUG macros
 #  - Warnings:        W4 and extra important warnings
-cmake_minimum_required(VERSION 3.27)
-
 include_guard(GLOBAL)
 
 

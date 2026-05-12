@@ -9,8 +9,6 @@
 #  - /ZI   not compatible with /clr. Using /Zi
 #  - /MT   not compatible with /clr. Ensure /MD[d]  See: fix_runtime_library_for_clr
 #  - /EHsc not compatible with /clr. Use /EHa
-cmake_minimum_required(VERSION 3.27)
-
 include_guard(GLOBAL)
 
 
