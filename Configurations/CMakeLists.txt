@@ -30,8 +30,22 @@ include("${CMAKE_CURRENT_LIST_DIR}/ConfigClrWin.cmake")
 # Set a configuration and optionally the character set for a specific target.
 # Also hide symbols in shared libraries by default. Export manually with generate_export_header pattern.
 #
-# Parsed Arguments: 
-#   TARGET_CHARSET:  Optional for Windows: ["Unicode", "MBCS", "SBCS"]. Default if not specified: "Unicode"
+# Parsed Arguments [Optional]:
+#   CHARSET:         For Windows: ["Unicode", "MBCS", "SBCS"]. Default if not specified: "Unicode"
+#
+# Exception Handling
+#   By default, we enable standard stack unwinding with synchronous exception handling.
+#   Set the target property EH_ASYNC to also catch asynchronous (hardware) exceptions such as null pointer dereferences and divide-by-zero via catch(...).
+#   Note: catching hardware exceptions is generally discouraged; prefer platform crash handlers.
+#
+#   Usage: set_target_properties(targetName PROPERTIES EH_ASYNC TRUE)
+#
+#   MSVC:
+#     Default:  /EHsc
+#     EH_ASYNC: /EHa
+#   GCC/Clang:
+#     Default:  -fexceptions
+#     EH_ASYNC: -fexceptions -fnon-call-exceptions
 #
 # Configuration Names
 #  Empty:      No extra configuration.
@@ -44,7 +58,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/ConfigClrWin.cmake")
 # Note: You can also just directly link to the configuration target. This function can be useful in patterns where e.g. a configuration choice is enforced.
 function(set_target_configuration targetName configName)
 	# Parse optional function arguments 
-	cmake_parse_arguments(ARG "" "TARGET_CHARSET" "" ${ARGN})
+	cmake_parse_arguments(ARG "" "CHARSET" "" ${ARGN})
 
 	# Handle Configurations
 	if(NOT "${configName}" MATCHES "^Config::")
@@ -66,14 +80,14 @@ function(set_target_configuration targetName configName)
 	# Handle Character Set (Unicode, MBCS, SBCS)
 	if(WIN32)
 		set(charsetMacros)
-		if("${ARG_TARGET_CHARSET}" STREQUAL "Unicode" OR "${ARG_TARGET_CHARSET}" STREQUAL "")
+		if("${ARG_CHARSET}" STREQUAL "Unicode" OR "${ARG_CHARSET}" STREQUAL "")
 			set(charsetMacros _UNICODE UNICODE)
-		elseif("${ARG_TARGET_CHARSET}" STREQUAL "MBCS")
+		elseif("${ARG_CHARSET}" STREQUAL "MBCS")
 			set(charsetMacros _MBCS)
-		elseif("${ARG_TARGET_CHARSET}" STREQUAL "SBCS")
+		elseif("${ARG_CHARSET}" STREQUAL "SBCS")
 			set(charsetMacros _SBCS)
 		else()
-			message(FATAL_ERROR "Invalid character set configuration specified '${ARG_TARGET_CHARSET}'. Use: ['Unicode', 'MBCS', 'SBCS'].")
+			message(FATAL_ERROR "Invalid character set configuration specified '${ARG_CHARSET}'. Use: ['Unicode', 'MBCS', 'SBCS'].")
 		endif()
 
 		target_compile_definitions(${targetName} PRIVATE ${charsetMacros})
