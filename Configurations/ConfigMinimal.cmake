@@ -2,8 +2,6 @@
 #  - Compiler/Linker: Only parallel build, optimization, and debug information settings
 #  - Macros:          Only _DEBUG and NDEBUG macros
 #  - Warnings:        No special setup
-cmake_minimum_required(VERSION 3.27)
-
 include_guard(GLOBAL)
 
 

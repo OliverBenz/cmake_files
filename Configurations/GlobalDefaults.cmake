@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.27)
-
 include_guard(GLOBAL)
 
 # Use this function only on the predefined interface libraries.

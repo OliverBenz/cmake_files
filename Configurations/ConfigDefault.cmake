@@ -3,8 +3,6 @@
 #  - Compiler/Linker: Parallel Build, Whole Program Optimization, Extra debug information and checks, explicitly set defaults.
 #  - Macros:          Only _DEBUG and NDEBUG macros
 #  - Warnings:        W4 and extra important warnings
-cmake_minimum_required(VERSION 3.27)
-
 include_guard(GLOBAL)
 
 
@@ -20,9 +18,13 @@ function(_set_target_options_compiler_def targetName)
 		/GS            # Buffer Security Check enabled.
 		/GR            # Adds code to check object types at run time. On by default.
 		/Gd            # Calling Convention. Explicitly use default (/Gd -> __cdecl).
-		/EHsc          # Exception handling model. 's' .. Standard stack unwinding and 'c' .. extern "C" functions never throw C++ exceptions.
 		/fp:precise    # Floating-point behavior precise. Explicitly use default: precise.
 		/permissive-   # Enforce ISO C++ standard compliance.
+
+		# Exception handling model.
+		# /EHsc: 's' .. Standard stack unwinding and 'c' .. extern "C" functions never throw C++ exceptions.
+		# /EHa : 'a' .. Catch both asynchronous and synchronous exceptions.
+		$<IF:$<BOOL:$<TARGET_PROPERTY:EH_ASYNC>>,/EHa,/EHsc>
 	)
 
 	set(MSVC_DEBUG
@@ -45,9 +47,12 @@ function(_set_target_options_compiler_def targetName)
 
 	# ----- GCC compiler flags
 	set(GCC_ALL
-		-fexceptions              # Exception handling — equivalent to /EHsc
 		-fstack-protector-strong  # Buffer security check — equivalent to /GS
 		-pipe                     # Use pipes instead of temp files — speeds up compilation like /MP
+
+		# Exception handling
+		-fexceptions                                                 # Standard stack unwinding
+		$<$<BOOL:$<TARGET_PROPERTY:EH_ASYNC>>:-fnon-call-exceptions> # Enable asynchronous exceptions
 	)
 	set(GCC_DEBUG
 		${GCC_ALL}
