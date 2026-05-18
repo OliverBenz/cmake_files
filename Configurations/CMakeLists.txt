@@ -35,17 +35,17 @@ include("${CMAKE_CURRENT_LIST_DIR}/ConfigClrWin.cmake")
 #
 # Exception Handling
 #   By default, we enable standard stack unwinding with synchronous exception handling.
-#   Set the target property EH_ASYNC to also catch asynchronous (hardware) exceptions such as null pointer dereferences and divide-by-zero via catch(...).
+#   Set the target property CONFIG_EH_ASYNC to also catch asynchronous (hardware) exceptions such as null pointer dereferences and divide-by-zero via catch(...).
 #   Note: catching hardware exceptions is generally discouraged; prefer platform crash handlers.
 #
-#   Usage: set_target_properties(targetName PROPERTIES EH_ASYNC TRUE)
+#   Usage: set_target_properties(targetName PROPERTIES CONFIG_EH_ASYNC TRUE)
 #
 #   MSVC:
-#     Default:  /EHsc
-#     EH_ASYNC: /EHa
+#     Default:         /EHsc
+#     CONFIG_EH_ASYNC: /EHa
 #   GCC/Clang:
-#     Default:  -fexceptions
-#     EH_ASYNC: -fexceptions -fnon-call-exceptions
+#     Default:         -fexceptions
+#     CONFIG_EH_ASYNC: -fexceptions -fnon-call-exceptions
 #
 # Configuration Names
 #  Empty:      No extra configuration.

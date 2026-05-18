@@ -24,7 +24,7 @@ function(_set_target_options_compiler_def targetName)
 		# Exception handling model.
 		# /EHsc: 's' .. Standard stack unwinding and 'c' .. extern "C" functions never throw C++ exceptions.
 		# /EHa : 'a' .. Catch both asynchronous and synchronous exceptions.
-		$<IF:$<BOOL:$<TARGET_PROPERTY:EH_ASYNC>>,/EHa,/EHsc>
+		$<IF:$<BOOL:$<TARGET_PROPERTY:CONFIG_EH_ASYNC>>,/EHa,/EHsc>
 	)
 
 	set(MSVC_DEBUG
@@ -51,8 +51,8 @@ function(_set_target_options_compiler_def targetName)
 		-pipe                     # Use pipes instead of temp files — speeds up compilation like /MP
 
 		# Exception handling
-		-fexceptions                                                 # Standard stack unwinding
-		$<$<BOOL:$<TARGET_PROPERTY:EH_ASYNC>>:-fnon-call-exceptions> # Enable asynchronous exceptions
+		-fexceptions                                                        # Standard stack unwinding
+		$<$<BOOL:$<TARGET_PROPERTY:CONFIG_EH_ASYNC>>:-fnon-call-exceptions> # Enable asynchronous exceptions
 	)
 	set(GCC_DEBUG
 		${GCC_ALL}
