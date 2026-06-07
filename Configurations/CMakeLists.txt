@@ -3,16 +3,6 @@ cmake_minimum_required(VERSION 3.20)
 include_guard(GLOBAL)
 
 
-# ----- Settings -----
-# -- We want to use LLD Linker on Mac/Linux if available
-find_program(LLD_LINKER lld)
-if(LLD_LINKER)
-    message(STATUS "lld found: ${LLD_LINKER} - enabling LLD linker and ICF")
-else()
-    message(STATUS "lld not found - using default linker, ICF disabled")
-endif()
-
-
 # -- Allow the option to override the Release build configuration with the RelWithDebInfo configuration.
 #    Useful in environments where debug information is always desired on release builds or where build systems restrict you to default Release builds.
 option(RELEASE_EQUALS_RELWITHDEBINFO "Use the RelWithDebInfo configuration also for Release builds." OFF)
@@ -75,7 +65,7 @@ function(set_target_configuration targetName configName)
 		endif()
 		message(FATAL_ERROR "Configuration project does not exist: '${configName}'.")
 	endif()
-	target_link_libraries(${targetName} PRIVATE ${configName})
+	target_link_libraries(${targetName} PRIVATE "$<BUILD_INTERFACE:${configName}>")
 
 	# Handle Character Set (Unicode, MBCS, SBCS)
 	if(WIN32)
