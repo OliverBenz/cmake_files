@@ -65,7 +65,7 @@ function(set_target_configuration targetName configName)
 		endif()
 		message(FATAL_ERROR "Configuration project does not exist: '${configName}'.")
 	endif()
-	target_link_libraries(${targetName} PRIVATE ${configName})
+	target_link_libraries(${targetName} PRIVATE "$<BUILD_INTERFACE:${configName}>")
 
 	# Handle Character Set (Unicode, MBCS, SBCS)
 	if(WIN32)
