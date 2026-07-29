@@ -2,34 +2,75 @@ include_guard(GLOBAL)
 
 # Use this function only on the predefined interface libraries.
 function(set_target_options_warnings targetName)
+	# Microslop disables noisy warnings. We prefer finding bugs.
 	set(MSVC_WARNINGS
-		/W4 # Baseline reasonable warnings
+		/W4     # Baseline reasonable warnings
 
-		/w14242 # 'identifier': conversion from 'type1' to 'type1', possible loss of data
-		/w14254 # 'operator': conversion from 'type1:field_bits' to 'type2:field_bits', possible loss of data
-		/w14263 # 'function': member function does not override any base class virtual member function
-		/w14265 # 'classname': class has virtual functions, but destructor is not virtual instances of this class may not
-
-		# Be destructed correctly
-		/w14287 # 'operator': unsigned/negative constant mismatch
-		/we4289 # Nonstandard extension used: 'variable': loop control variable declared in the for-loop is used outside
-
-		# The for-loop scope
-		/w14296 # 'operator': expression is always 'boolean_value'
-		/w14311 # 'variable': pointer truncation from 'type1' to 'type2'
-		/w14545 # Expression before comma evaluates to a function which is missing an argument list
-		/w14546 # Function call before comma missing argument list
-		/w14547 # 'operator': operator before comma has no effect; expected operator with side-effect
-		/w14549 # 'operator': operator before comma has no effect; did you intend 'operator'?
-		/w14555 # Expression has no effect; expected expression with side- effect
-		/w14619 # Pragma warning: there is no warning number 'number'
-		/w14640 # Enable warning on thread un-safe static member initialization
-		/w14826 # Conversion from 'type1' to 'type_2' is sign-extended. This may cause unexpected runtime behavior.
+		# ATL Related
 		/w14905 # Wide string literal cast to 'LPSTR'
 		/w14906 # String literal cast to 'LPWSTR'
+		/w14165 # 'HRESULT' is being converted to 'bool'; are you sure this is what you want?
+
+		# Comma Invalid
+		/w14545 # expression before comma evaluates to a function which is missing an argument list
+		/w14546 # function call before comma missing argument list
+		/w14547 # 'operator': operator before comma has no effect; expected operator with side-effect
+		/w14548 # expression before comma has no effect; expected expression with side-effect
+		/w14549 # 'operator1': operator before comma has no effect; did you intend 'operator2'?
+
+		# Data Loss
+		/w14242 # 'identifier': conversion from 'type1' to 'type2', possible loss of data
+		/w14254 # 'operator': conversion from 'type1' to 'type2', possible loss of data
+		/w14365 # 'action': conversion from 'type_1' to 'type_2', signed/unsigned mismatch
+		/w14388 # signed/unsigned mismatch
+		/w14287 # 'operator': unsigned/negative constant mismatch
+		/w14800 # Implicit conversion from 'type' to bool. Possible information loss 16.0
+		/w14826 # Conversion from 'type1' to 'type2' is sign-extended. This may cause unexpected runtime behavior.
+		/w15219 # implicit conversion from 'type-1' to 'type-2', possible loss of data 16.7
+		/w14302 # 'conversion': truncation from 'type1' to 'type2'
+		/w14311 # 'variable': pointer truncation from 'type' to 'type'
+
+		# Safety
+		/w14061 # enumerator 'identifier' in a switch of enum 'enumeration' is not explicitly handled by a case label.
+		/w14062 # enumerator 'identifier' in a switch of enum 'enumeration' is not handled.
+		/w14191 # 'operator': unsafe conversion from 'type_of_expression' to 'type_required'
+		/w14263 # 'function': member function does not override any base class virtual member function
+		/w14264 # 'virtual_function': no override available for virtual member function from base 'class'; function is hidden
+		/w14265 # 'class': class has virtual functions, but destructor is not virtual
+		/w14266 # 'function': no override available for virtual member function from base 'type'; function is hidden
 		/w14928 # Illegal copy-initialization; more than one user-defined conversion has been implicitly applied
 
-		$<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:/WX> # Warnings as errors
+		# Object Model
+		/w15038 # data member 'member1' will be initialized after data member 'member2' 15.3
+		/w14623 # default constructor could not be generated because a base class default constructor is inaccessible
+		/w14625 # copy constructor could not be generated because a base class copy constructor is inaccessible
+		/w14626 # assignment operator could not be generated because a base class assignment operator is inaccessible
+
+		# Hygiene
+		/w14555 # expression has no effect; expected expression with side-effect
+		/w34619 # #pragma warning: there is no warning number 'number'
+		/w44296 # 'operator': expression is always false
+		/w44464 # relative include path contains '..'
+		/w44654 # Code placed before include of precompiled header line will be ignored. Add code to precompiled header. 14.1
+		/w14822 # 'member': local class member function does not have a body
+		/w14946 # reinterpret_cast used between related classes: 'class1' and 'class2'
+		/w45031 # #pragma warning(pop): likely mismatch, popping warning state pushed in different file 14.1
+		/w45032 # detected #pragma warning(push) with no corresponding #pragma warning(pop) 14.1
+		/w45233 # explicit lambda capture 'identifier' is not used 16.10
+		/w45240 # 'attribute-name': attribute is ignored in this syntactic position 16.10
+		/w15246 # 'member': the initialization of a subobject should be wrapped in braces 16.10
+		/w45258 # explicit capture of 'symbol' is not required for this use 17.2
+		/w45263 # calling 'std::move' on a temporary object prevents copy elision 17.4
+		/w45264 # 'variable-name': 'const' variable is not used 17.4
+		/w45266 # 'const' qualifier on return type has no effect 17.6
+		/w44289 # nonstandard extension used : 'var' : loop control variable declared in the for-loop is used outside the for-loop scope
+
+		# Standard Compliance
+		/w14987 # nonstandard extension used: 'throw (...)'
+		/w15029 # nonstandard extension used: alignment attributes in C++ apply to variables, data members and tag types only
+		/w15042 # 'function': function declarations at block scope cannot be specified 'inline' in standard C++; remove 'inline' specifier 15.5
+
+		$<$<NOT:$<CONFIG:Debug>>:/WX> # Warnings as errors
 	)
 
 	set(CLANG_WARNINGS
