@@ -26,6 +26,7 @@ set(IDE_FOLDER_SOURCE   "Source"   CACHE STRING "IDE folder for source projects.
 set(IDE_FOLDER_EXAMPLES "Examples" CACHE STRING "IDE folder for example projects.")
 set(IDE_FOLDER_EXTERNAL "External" CACHE STRING "IDE folder for external projects.")
 set(IDE_FOLDER_TESTS    "Tests"    CACHE STRING "IDE folder for testing projects.")
+set(IDE_FOLDER_TOOLS    "Tools"    CACHE STRING "IDE folder for tooling projects.")
 
 
 # ----- Helper functions -----
