@@ -29,7 +29,7 @@ function(set_target_options_warnings targetName)
 		/w14906 # String literal cast to 'LPWSTR'
 		/w14928 # Illegal copy-initialization; more than one user-defined conversion has been implicitly applied
 
-		$<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:/WX> # Warnings as errors
+		$<$<CONFIG:Debug>:/WX> # Warnings as errors
 	)
 
 	set(CLANG_WARNINGS
@@ -51,7 +51,7 @@ function(set_target_options_warnings targetName)
 		-Wformat=2                   # Warn on security issues around functions that format output (ie printf)
 
 		# Warnings as errors on Release builds
-		$<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:-Werror>
+		$<$<CONFIG:Debug>:-Werror>
 	)
 
 	set(GCC_WARNINGS
